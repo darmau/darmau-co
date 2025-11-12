@@ -1,6 +1,7 @@
 ---
 import "@/styles/global.css";
 import Navbar from "@/components/Navbar.astro";
+import Footer from "@/components/Footer.astro";
 ---
 
 <html lang="zh">
@@ -14,8 +15,6 @@ import Navbar from "@/components/Navbar.astro";
   <body class="bg-slate-50">
     <Navbar />
     <slot />
-    <footer>
-      <p>Copyright 2025 Astro</p>
-    </footer>
+    <Footer />
   </body>
 </html>
