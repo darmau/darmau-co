@@ -1,0 +1,21 @@
+---
+const currentRoute = Astro.url.pathname.split('/')[1];
+const isCurrentRoute = (route: string) => {
+  return currentRoute === route ? 'text-stone-700 font-bold' : 'text-stone-500 hover:text-stone-700';
+}
+---
+
+<nav class="max-w-3xl mx-auto py-4 sm:py-8 px-4">
+  <div>{currentRoute}</div>
+  <ul class="flex justify-center items-center gap-4 sm:gap-8 text-sm">
+    <li class={isCurrentRoute('articles')}>
+      <a href="/articles/1">文章</a>
+    </li>
+    <li class={isCurrentRoute('albums')}>
+      <a href="/albums/1">摄影</a>
+    </li>
+    <li class={isCurrentRoute('thoughts')}>
+      <a href="/thoughts">碎片</a>
+    </li>
+  </ul>
+</nav>
