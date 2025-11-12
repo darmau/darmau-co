@@ -1,0 +1,62 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { supabase } from "@/lib/supabase";
+import ArticleImage from "@/components/ArticleImage.astro";
+
+// 生成所有文章的静态路由
+export async function getStaticPaths() {
+  const { data: articles, error } = await supabase
+    .from("article")
+    .select("slug, language!inner (lang)")
+    .eq("language.lang", "zh");
+
+  if (error) {
+    console.error("Error fetching articles for static paths:", error);
+    return [];
+  }
+
+  return articles.map((article) => ({
+    params: { slug: article.slug },
+  }));
+}
+
+// 获取当前文章的slug
+const { slug } = Astro.params;
+
+// 从 Supabase 获取文章详情
+const { data: article, error } = await supabase
+  .from("article")
+  .select(
+    "id, title, subtitle, slug, abstract, published_at, content_json, language!inner (lang), category!inner (title)",
+  )
+  .eq("slug", slug)
+  .eq("language.lang", "zh")
+  .single();
+
+if (error) {
+  console.error("Error fetching article:", error);
+  return Astro.redirect("/404");
+}
+
+if (!article) {
+  return Astro.redirect("/404");
+}
+
+// 格式化发布时间
+const publishedDate = new Date(article.published_at).toLocaleDateString(
+  "zh-CN",
+  {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  },
+);
+---
+
+<Layout>
+  <main class="max-w-3xl mx-auto py-10 px-4">
+    <h1>{article.title}</h1>
+    <h2>{article.subtitle}</h2>
+    {JSON.stringify(article.content_json)}
+  </main>
+</Layout>
