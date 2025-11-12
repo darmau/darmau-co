@@ -1,0 +1,50 @@
+---
+import LockIcon from "@/icons/lock.astro";
+import StarIcon from "@/icons/star.astro";
+const {
+  title,
+  subtitle,
+  slug,
+  published_at,
+  category,
+  is_premium,
+  is_featured,
+} = Astro.props;
+---
+
+<div class="bg-white rounded-lg p-4 md:p-6 border border-slate-200 space-y-2">
+  <h3 class="text-lg md:text-xl font-medium text-slate-800 hover:text-slate-900">
+    {title}
+  </h3>
+  <div class="flex items-center gap-1">
+    <p class="text-sm text-slate-500">{category.title}</p>
+    <span class="text-slate-500">-</span>
+    <time class="text-sm text-slate-500"
+      >{
+        new Date(published_at).toLocaleDateString("zh-CN", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      }</time
+    >
+  </div>
+  {subtitle && <p class="text-base text-slate-700">{subtitle}</p>}
+  <div class="flex items-center gap-2">
+    {
+      is_premium && (
+        <span class="text-sm text-slate-500">
+          <LockIcon />
+        </span>
+      )
+    }
+    {
+      is_featured && (
+        <span class="text-sm text-slate-500">
+          <StarIcon />
+        </span>
+      )
+    }
+    <a href={`/article/${slug}`} class="bg-slate-200 text-slate-800 px-2 py-1 rounded text-sm text-slate-800 hover:bg-slate-300 transition-colors">Read More</a>
+  </div>
+</div>
