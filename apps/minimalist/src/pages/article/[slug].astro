@@ -27,7 +27,7 @@ const { slug } = Astro.params;
 const { data: article, error } = await supabase
   .from("article")
   .select(
-    "id, title, subtitle, slug, abstract, published_at, content_json, language!inner (lang), category!inner (title)",
+    "id, title, subtitle, slug, abstract, published_at, is_premium,content_json, language!inner (lang), category!inner (title), cover!inner (storage_key)",
   )
   .eq("slug", slug)
   .eq("language.lang", "zh")
@@ -51,12 +51,42 @@ const publishedDate = new Date(article.published_at).toLocaleDateString(
     day: "numeric",
   },
 );
+
+const imgUrl = import.meta.env.IMG_PREFIX;
 ---
 
 <Layout>
-  <main class="max-w-3xl mx-auto py-10 px-4">
-    <h1>{article.title}</h1>
-    <h2>{article.subtitle}</h2>
-    <ContentFormatter content_json={article.content_json} />
+  <main class="max-w-3xl mx-auto py-10 px-4 space-y-6">
+    <h1 class="text-4xl font-medium text-slate-800">{article.title}</h1>
+    <h2 class="text-xl text-slate-500">{article.subtitle}</h2>
+    <div class="flex items-center gap-2">
+      <p class="text-sm text-slate-500">{article.category.title}</p>
+      <span class="text-slate-500">-</span>
+      <time class="text-sm text-slate-500">{publishedDate}</time>
+    </div>
+    <div class="text-slate-600 bg-slate-50 rounded-lg p-4">
+      {article.abstract}
+    </div>
+    <img
+      class="w-full h-auto rounded-lg"
+      src={`${imgUrl}cdn-cgi/image/format=auto,quality=85,width=960,height=480/${article.cover.storage_key}`}
+      alt={article.title}
+    />
+    {
+      article.is_premium ? (
+        <div class="text-center py-10 space-y-4">
+          <p class="text-slate-700">本文需前往主站阅读</p>
+          <a 
+            href={`https://darmau.co/zh/article/${article.slug}`} 
+            target="_blank" 
+            class="bg-slate-700 text-white px-4 py-2 rounded-md inline-block"
+            >
+              查看原文
+            </a>
+        </div>
+      ) : (
+        <ContentFormatter content_json={article.content_json} />
+      )
+    }
   </main>
 </Layout>
