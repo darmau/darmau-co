@@ -242,20 +242,21 @@ function hasImageAttrs(attrs?: Content["attrs"]): attrs is ImageAttrs {
         );
       }
 
-      // Code Block
-      if (node.type === "codeBlock" || node.type === "customCodeBlock") {
-        const code = node.content?.[0]?.text || "";
-        return (
-          <pre class="my-4 p-4 bg-gray-100 rounded overflow-x-auto">
-            <code class="text-sm font-mono">{code}</code>
-          </pre>
-        );
-      }
+       // Code Block
+       if (node.type === "codeBlock" || node.type === "customCodeBlock") {
+         const code = node.content?.[0]?.text || "";
+         const language = node.attrs?.language || "";
+         return (
+           <pre class="my-6 rounded-lg overflow-x-auto">
+             <code class={language ? `language-${language}` : ""}>{code}</code>
+           </pre>
+         );
+       }
 
       // Horizontal Rule
       if (node.type === "horizontalRule") {
         return (
-          <div class="flex items-center">
+          <div class="flex items-center my-8">
             <div
               aria-hidden="true"
               class="w-full border-t border-gray-300 dark:border-white/15"
@@ -315,7 +316,39 @@ function hasImageAttrs(attrs?: Content["attrs"]): attrs is ImageAttrs {
         );
       }
 
-      return null;
-    })
-  }
+       return null;
+     })
+   }
 </div>
+
+<script>
+  import hljs from "highlight.js";
+  // 引入 highlight.js 主题样式
+  // 可选主题: github-dark, github, atom-one-dark, monokai, nord, dracula 等
+  // 完整列表见: https://github.com/highlightjs/highlight.js/tree/main/src/styles
+  import "highlight.js/styles/github-dark.css";
+
+  // 在客户端高亮所有代码块
+  document.querySelectorAll("pre code").forEach((block) => {
+    hljs.highlightElement(block as HTMLElement);
+  });
+</script>
+
+<style is:global>
+  /* 自定义代码块样式 */
+  pre {
+    padding: 1rem;
+    line-height: 1.5;
+  }
+  
+  pre code {
+    display: block;
+    padding: 0;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  }
+  
+  /* 行号支持（如果需要） */
+  pre code.hljs {
+    padding: 1rem;
+  }
+</style>
