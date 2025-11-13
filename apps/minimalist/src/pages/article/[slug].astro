@@ -53,9 +53,18 @@ const publishedDate = new Date(article.published_at).toLocaleDateString(
 );
 
 const imgUrl = import.meta.env.IMG_PREFIX;
+
+// 构建文章封面图片的完整 URL
+const coverImageUrl = `${imgUrl}cdn-cgi/image/format=auto,quality=85,width=960,height=480/${article.cover.storage_key}`;
 ---
 
-<Layout>
+<Layout
+  title={`${article.title} | 积薪(极简版)`}
+  description={article.abstract || article.subtitle}
+  url={`https://darmau.design/article/${slug}`}
+  image={coverImageUrl}
+  type="article"
+>
   <main class="max-w-3xl mx-auto py-10 px-4 space-y-6">
     <h1 class="text-4xl font-medium text-slate-800">{article.title}</h1>
     <h2 class="text-xl text-slate-500">{article.subtitle}</h2>
@@ -69,7 +78,7 @@ const imgUrl = import.meta.env.IMG_PREFIX;
     </div>
     <img
       class="w-full h-auto rounded-lg"
-      src={`${imgUrl}cdn-cgi/image/format=auto,quality=85,width=960,height=480/${article.cover.storage_key}`}
+      src={coverImageUrl}
       alt={article.title}
     />
     {

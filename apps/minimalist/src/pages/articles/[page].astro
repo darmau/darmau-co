@@ -73,7 +73,11 @@ const total = totalCount || 0;
 const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 ---
 
-<Layout>
+<Layout
+  title={`所有文章 - 第${currentPage}页 | 积薪(极简版)`}
+  description="浏览积薪的所有文章内容"
+  url={`https://darmau.design/articles/${currentPage}`}
+>
   <main class="max-w-3xl mx-auto py-10 px-4">
     <h1 class="text-sm text-slate-500 mb-4">所有文章</h1>
     <ul class="flex flex-col gap-3">
