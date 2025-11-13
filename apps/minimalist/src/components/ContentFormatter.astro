@@ -1,0 +1,321 @@
+---
+interface Mark {
+  type: string;
+  attrs?: {
+    href?: string;
+    target?: string;
+    rel?: string;
+    [key: string]: any;
+  };
+}
+
+interface Content {
+  type: string;
+  text?: string;
+  content?: Content[];
+  attrs?: {
+    id?: number | string;
+    level?: number;
+    start?: number;
+    storage_key?: string;
+    prefix?: string;
+    alt?: string;
+    caption?: string;
+    language?: string;
+    [key: string]: any;
+  };
+  marks?: Mark[];
+}
+
+interface ImageAttrs {
+  id: number | string;
+  storage_key: string;
+  prefix: string;
+  alt?: string;
+  caption?: string;
+}
+
+const { content_json } = Astro.props;
+
+// 提取实际的内容数组
+const contentArray =
+  content_json?.type === "doc" ? content_json.content : content_json;
+
+// 辅助函数：检查是否是图片属性
+function hasImageAttrs(attrs?: Content["attrs"]): attrs is ImageAttrs {
+  return Boolean(
+    attrs &&
+      (typeof attrs.id === "number" || typeof attrs.id === "string") &&
+      typeof attrs.storage_key === "string" &&
+      typeof attrs.prefix === "string",
+  );
+}
+---
+
+<div class="prose max-w-none">
+  {
+    contentArray?.map((node: Content) => {
+      // Paragraph
+      if (node.type === "paragraph") {
+        return (
+          <p class="my-4 text-zinc-800 leading-8">
+            {node.content?.map((textNode) => {
+              if (textNode.type === "hardBreak") {
+                return <br />;
+              }
+
+              let text = textNode.text || "";
+              const linkMark = textNode.marks?.find((m) => m.type === "link");
+              const hasBold = textNode.marks?.some((m) => m.type === "bold");
+              const hasItalic = textNode.marks?.some(
+                (m) => m.type === "italic",
+              );
+              const hasStrike = textNode.marks?.some(
+                (m) => m.type === "strike",
+              );
+              const hasHighlight = textNode.marks?.some(
+                (m) => m.type === "highlight",
+              );
+              const hasCode = textNode.marks?.some((m) => m.type === "code");
+
+              // 构建嵌套的元素
+              let element: any = text;
+
+              if (hasCode) {
+                element = (
+                  <code class="font-mono px-2 bg-gray-100 rounded">
+                    {element}
+                  </code>
+                );
+              }
+              if (hasHighlight) {
+                element = <mark class="bg-yellow-300">{element}</mark>;
+              }
+              if (hasStrike) {
+                element = (
+                  <del class="line-through decoration-red-400">{element}</del>
+                );
+              }
+              if (hasItalic) {
+                element = <em class="italic">{element}</em>;
+              }
+              if (hasBold) {
+                element = <strong class="font-medium">{element}</strong>;
+              }
+              if (linkMark) {
+                element = (
+                  <a
+                    class="text-violet-700 after:content-['_↗'] hover:underline hover:decoration-2 hover:underline-offset-4"
+                    href={linkMark.attrs?.href}
+                    target={linkMark.attrs?.target}
+                    rel={linkMark.attrs?.rel}
+                  >
+                    {element}
+                  </a>
+                );
+              }
+
+              return element;
+            })}
+          </p>
+        );
+      }
+
+      // Heading
+      if (node.type === "heading") {
+        const headingId =
+          node.attrs?.id !== undefined ? String(node.attrs.id) : undefined;
+        const textContent = node.content?.map((item) => item.text).join("");
+
+        if (node.attrs?.level === 2) {
+          return (
+            <h2
+              class="mt-16 mb-4 font-bold text-3xl text-zinc-800"
+              id={headingId}
+            >
+              {textContent}
+            </h2>
+          );
+        } else if (node.attrs?.level === 3) {
+          return (
+            <h3
+              class="mt-12 mb-4 font-bold text-2xl text-zinc-700"
+              id={headingId}
+            >
+              {textContent}
+            </h3>
+          );
+        } else if (node.attrs?.level === 4) {
+          return (
+            <h4
+              class="mt-8 mb-4 font-bold text-xl text-zinc-600"
+              id={headingId}
+            >
+              {textContent}
+            </h4>
+          );
+        }
+        return (
+          <h2 class="mb-4 font-bold text-3xl text-zinc-800" id={headingId}>
+            {textContent}
+          </h2>
+        );
+      }
+
+      // Image
+      if (node.type === "image" && hasImageAttrs(node.attrs)) {
+        const imageUrl = `${node.attrs.prefix}/${node.attrs.storage_key}`;
+        return (
+          <figure class="my-8">
+            <img
+              src={imageUrl}
+              alt={node.attrs.alt || ""}
+              class="w-full h-auto rounded-lg"
+            />
+            {node.attrs.caption && (
+              <figcaption class="mt-2 text-sm text-center text-gray-600">
+                {node.attrs.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
+
+      // Ordered List
+      if (node.type === "orderedList") {
+        return (
+          <ol
+            start={node.attrs?.start}
+            class="list-decimal pl-6 my-4 space-y-2"
+          >
+            {node.content?.map((listItem) => (
+              <li class="text-zinc-800 leading-7">
+                {listItem.content?.map((subNode: Content) => {
+                  if (subNode.type === "paragraph") {
+                    return subNode.content
+                      ?.map((textNode) => textNode.text)
+                      .join("");
+                  }
+                  return null;
+                })}
+              </li>
+            ))}
+          </ol>
+        );
+      }
+
+      // Bullet List
+      if (node.type === "bulletList") {
+        return (
+          <ul class="list-disc pl-6 my-4 space-y-2">
+            {node.content?.map((listItem) => (
+              <li class="text-zinc-800 leading-7">
+                {listItem.content?.map((subNode: Content) => {
+                  if (subNode.type === "paragraph") {
+                    return subNode.content
+                      ?.map((textNode) => textNode.text)
+                      .join("");
+                  }
+                  return null;
+                })}
+              </li>
+            ))}
+          </ul>
+        );
+      }
+
+      // Blockquote
+      if (node.type === "blockquote") {
+        return (
+          <blockquote class="my-4 py-1 pl-4 border-l-2 border-violet-800 text-lg font-medium">
+            {node.content?.map((subNode: Content) => {
+              if (subNode.type === "paragraph") {
+                return (
+                  <p class="text-zinc-700">
+                    {subNode.content?.map((textNode) => textNode.text).join("")}
+                  </p>
+                );
+              }
+              return null;
+            })}
+          </blockquote>
+        );
+      }
+
+      // Code Block
+      if (node.type === "codeBlock" || node.type === "customCodeBlock") {
+        const code = node.content?.[0]?.text || "";
+        return (
+          <pre class="my-4 p-4 bg-gray-100 rounded overflow-x-auto">
+            <code class="text-sm font-mono">{code}</code>
+          </pre>
+        );
+      }
+
+      // Horizontal Rule
+      if (node.type === "horizontalRule") {
+        return (
+          <div class="flex items-center">
+            <div
+              aria-hidden="true"
+              class="w-full border-t border-gray-300 dark:border-white/15"
+            />
+            <div class="relative flex justify-center">
+              <span class="bg-white px-2 text-sm text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                Continue
+              </span>
+            </div>
+            <div
+              aria-hidden="true"
+              class="w-full border-t border-gray-300 dark:border-white/15"
+            />
+          </div>
+        );
+      }
+
+      // Table
+      if (node.type === "table") {
+        const headerRow = node.content?.[0];
+        const bodyRows = node.content?.slice(1);
+
+        return (
+          <div class="my-8 overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-300 border border-gray-300">
+              <thead class="bg-gray-50">
+                {headerRow && (
+                  <tr>
+                    {headerRow.content?.map((cell) => (
+                      <th
+                        scope="col"
+                        class="px-4 py-2 text-left text-sm font-bold text-gray-900"
+                      >
+                        {cell.content?.[0]?.content
+                          ?.map((textNode: Content) => textNode.text)
+                          .join("")}
+                      </th>
+                    ))}
+                  </tr>
+                )}
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                {bodyRows?.map((row) => (
+                  <tr class="hover:bg-gray-50">
+                    {row.content?.map((cell) => (
+                      <td class="px-4 py-2 text-sm text-gray-700">
+                        {cell.content?.[0]?.content
+                          ?.map((textNode: Content) => textNode.text)
+                          .join("")}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+
+      return null;
+    })
+  }
+</div>
