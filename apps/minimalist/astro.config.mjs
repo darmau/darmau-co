@@ -9,12 +9,7 @@ export default defineConfig({
     schema: {
       SUPABASE_URL: envField.string({ context: 'server', access: 'secret' }),
       SUPABASE_ANON_KEY: envField.string({ context: 'server', access: 'secret' }),
-      IMG_PREFIX: envField.string({ context: 'server', access: 'secret' }),
     }
-  },
-
-  image: {
-    domains: ["img.darmau.design"]
   },
 
   vite: {
