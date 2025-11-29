@@ -1,17 +1,95 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { supabase } from "@/lib/supabase";
+
+const imgUrl = import.meta.env.IMG_PREFIX;
+
+const { data: thoughts, error } = await supabase
+  .from("thought")
+  .select(
+    `
+      id,
+      slug,
+      content_json,
+      content_text,
+      created_at,
+      page_view,
+      comments:comment(count),
+      thought_image (
+        image (id, alt, storage_key, width, height)
+      )
+    `,
+  )
+  .order("created_at", { ascending: false })
+  .limit(24);
+
+if (error) {
+  console.error("Error fetching thoughts:", error);
+}
+
+const formatDate = (dateString?: string) =>
+  dateString
+    ? new Date(dateString).toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 ---
 
 <Layout
   title="想法 | 积薪(极简版)"
-  description="想法页面正在开发中"
+  description="最新的24条想法速览"
   url="https://darmau.design/thoughts"
 >
-  <main class="max-w-3xl mx-auto py-20 px-4">
-    <div class="text-center space-y-4">
-      <h1 class="text-2xl text-slate-700">本页面正在开发中</h1>
-      <p class="text-slate-500">敬请期待</p>
+  <main class="max-w-5xl mx-auto py-10 px-4 space-y-6">
+    <div class="space-y-2">
+      <p class="text-sm text-slate-500">想法</p>
+      <h1 class="text-3xl font-medium text-slate-800">最新 24 条碎片</h1>
+      <p class="text-slate-600">无详情页，直接在此浏览。</p>
     </div>
+
+    {
+      thoughts && thoughts.length > 0 ? (
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {thoughts.map((thought) => {
+            const commentCount = Array.isArray(thought.comments)
+              ? thought.comments[0]?.count || 0
+              : 0;
+
+            const coverImage = thought.thought_image?.[0]?.image?.storage_key
+              ? `${imgUrl}cdn-cgi/image/format=auto,quality=85,width=1200/${thought.thought_image[0].image.storage_key}`
+              : null;
+
+            return (
+              <article class="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                {coverImage && (
+                  <div class="aspect-[16/9] bg-slate-100">
+                    <img
+                      src={coverImage}
+                      alt={thought.thought_image?.[0]?.image?.alt || "封面"}
+                      class="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+                <div class="flex flex-1 flex-col gap-3 p-4">
+                  <p class="text-sm text-slate-500">
+                    <time>{formatDate(thought.created_at)}</time>
+                    <span class="mx-2 text-slate-300">·</span>
+                    <span>{commentCount} 评论</span>
+                  </p>
+                  <p class="text-base leading-7 text-slate-800 line-clamp-5">
+                    {thought.content_text || "无内容"}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <p class="text-slate-500">暂无想法</p>
+      )
+    }
   </main>
 </Layout>
-
