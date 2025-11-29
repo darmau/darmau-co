@@ -13,13 +13,13 @@ type ContentNode = {
 
 type ImageAttrs = {
   storage_key: string;
-  prefix: string;
+  prefix?: string;
   alt?: string;
   caption?: string;
 };
 
 const hasImageAttrs = (attrs?: Record<string, any>): attrs is ImageAttrs =>
-  Boolean(attrs?.storage_key && attrs?.prefix);
+  Boolean(attrs?.storage_key);
 
 function extractImages(contentJson: any): ImageAttrs[] {
   const content = Array.isArray(contentJson?.content)
@@ -95,6 +95,31 @@ if (!albumContent) {
   return Astro.redirect("/404");
 }
 
+const { data: albumImagesData, error: albumImagesError } = await supabase
+  .from("photo_image")
+  .select(
+    `
+      order,
+      image (
+        alt,
+        caption,
+        height,
+        width,
+        storage_key,
+        exif,
+        location,
+        latitude,
+        longitude
+      )
+    `,
+  )
+  .eq("photo_id", albumContent.id)
+  .order("order", { ascending: true });
+
+if (albumImagesError) {
+  console.error("Error fetching album images:", albumImagesError);
+}
+
 const publishedDate = new Date(albumContent.published_at).toLocaleDateString(
   "zh-CN",
   {
@@ -109,9 +134,25 @@ const albumImages = extractImages(albumContent.content_json).map((image) => ({
   url: `${image.prefix}/${image.storage_key}`,
 }));
 
+const normalizedAlbumImages =
+  albumImagesData?.map((item) =>
+    item.image
+      ? {
+          ...item.image,
+          order: item.order ?? 0,
+          url: `${imgUrl}cdn-cgi/image/format=auto,quality=90,width=1600/${item.image.storage_key}`,
+        }
+      : null,
+  ).filter(Boolean) ?? [];
+
+const galleryImages =
+  normalizedAlbumImages.length > 0
+    ? normalizedAlbumImages.sort((a, b) => (a?.order || 0) - (b?.order || 0))
+    : albumImages;
+
 const coverImage = albumContent.cover?.storage_key
   ? `${imgUrl}cdn-cgi/image/format=auto,quality=85,width=1600,height=900/${albumContent.cover.storage_key}`
-  : albumImages[0]?.url;
+  : galleryImages[0]?.url;
 const description =
   albumContent.abstract || albumContent.content_text || albumContent.title;
 ---
@@ -135,11 +176,11 @@ const description =
 
     <ContentFormatter content_json={albumContent.content_json} />
 
-    {albumImages.length > 0 && (
+    {galleryImages.length > 0 && (
       <section class="space-y-4">
         <h2 class="text-lg font-medium text-slate-800">全部照片</h2>
         <div class="grid gap-4 sm:grid-cols-2">
-          {albumImages.map((image) => (
+          {galleryImages.map((image) => (
             <figure class="overflow-hidden rounded-lg border border-slate-200 bg-white">
               <img
                 src={image.url}
