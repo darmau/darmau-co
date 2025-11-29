@@ -117,22 +117,20 @@ const totalPages = Math.max(1, Math.ceil(total / 24));
                 href={`/album/${album.slug}`}
                 class="group mb-4 block break-inside-avoid overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
               >
-                <div class="aspect-[4/5] w-full bg-slate-100">
-                  {
-                    coverUrl ? (
-                      <img
-                        src={coverUrl}
-                        alt={album.title}
-                        class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div class="flex h-full items-center justify-center text-sm text-slate-400">
-                        暂无封面
-                      </div>
-                    )
-                  }
-                </div>
+                {
+                  coverUrl ? (
+                    <img
+                      src={coverUrl}
+                      alt={album.title}
+                      class="w-full h-auto bg-slate-100 transition duration-300 group-hover:scale-[1.01]"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="flex h-48 items-center justify-center bg-slate-50 text-sm text-slate-400">
+                      暂无封面
+                    </div>
+                  )
+                }
                 <div class="p-4 space-y-2">
                   <div class="flex items-center gap-2 text-xs text-slate-500">
                     <span>{album.category?.title || "摄影"}</span>
