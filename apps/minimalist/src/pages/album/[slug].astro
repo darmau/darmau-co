@@ -1,0 +1,159 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ContentFormatter from "@/components/ContentFormatter.astro";
+import { supabase } from "@/lib/supabase";
+
+const imgUrl = import.meta.env.IMG_PREFIX;
+
+type ContentNode = {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: ContentNode[];
+};
+
+type ImageAttrs = {
+  storage_key: string;
+  prefix: string;
+  alt?: string;
+  caption?: string;
+};
+
+const hasImageAttrs = (attrs?: Record<string, any>): attrs is ImageAttrs =>
+  Boolean(attrs?.storage_key && attrs?.prefix);
+
+function extractImages(contentJson: any): ImageAttrs[] {
+  const content = Array.isArray(contentJson?.content)
+    ? contentJson.content
+    : Array.isArray(contentJson)
+      ? contentJson
+      : [];
+
+  const images: ImageAttrs[] = [];
+
+  const walk = (nodes: ContentNode[]) => {
+    nodes.forEach((node) => {
+      if (node?.type === "image" && hasImageAttrs(node.attrs)) {
+        images.push(node.attrs);
+      }
+      if (Array.isArray(node?.content)) {
+        walk(node.content);
+      }
+    });
+  };
+
+  walk(content);
+  return images;
+}
+
+export async function getStaticPaths() {
+  const { data: albums, error } = await supabase
+    .from("photo")
+    .select("slug, language!inner (lang)")
+    .eq("language.lang", "zh");
+
+  if (error) {
+    console.error("Error fetching albums for static paths:", error);
+    return [];
+  }
+
+  return albums.map((album) => ({
+    params: { slug: album.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+
+const { data: albumContent, error } = await supabase
+  .from("photo")
+  .select(
+    `
+      id,
+      title,
+      slug,
+      abstract,
+      published_at,
+      content_json,
+      content_text,
+      topic,
+      page_view,
+      reactions,
+      cover (storage_key),
+      category (title, slug),
+      language!inner (lang)
+    `,
+  )
+  .eq("slug", slug)
+  .eq("language.lang", "zh")
+  .single();
+
+if (error) {
+  console.error("Error fetching album:", error);
+  return Astro.redirect("/404");
+}
+
+if (!albumContent) {
+  return Astro.redirect("/404");
+}
+
+const publishedDate = new Date(albumContent.published_at).toLocaleDateString(
+  "zh-CN",
+  {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  },
+);
+
+const albumImages = extractImages(albumContent.content_json).map((image) => ({
+  ...image,
+  url: `${image.prefix}/${image.storage_key}`,
+}));
+
+const coverImage = albumContent.cover?.storage_key
+  ? `${imgUrl}cdn-cgi/image/format=auto,quality=85,width=1600,height=900/${albumContent.cover.storage_key}`
+  : albumImages[0]?.url;
+const description =
+  albumContent.abstract || albumContent.content_text || albumContent.title;
+---
+
+<Layout
+  title={`${albumContent.title} | 积薪(极简版)`}
+  description={description}
+  url={`https://darmau.design/album/${slug}`}
+  image={coverImage}
+  type="article"
+>
+  <main class="max-w-4xl mx-auto py-10 px-4 space-y-8">
+    <header class="space-y-3">
+      <p class="text-sm text-slate-500">摄影 · {albumContent.category?.title || "未分类"}</p>
+      <h1 class="text-4xl font-medium text-slate-800">{albumContent.title}</h1>
+      <time class="text-sm text-slate-500">{publishedDate}</time>
+      {albumContent.abstract && (
+        <p class="text-slate-600 bg-slate-50 rounded-lg p-4">{albumContent.abstract}</p>
+      )}
+    </header>
+
+    <ContentFormatter content_json={albumContent.content_json} />
+
+    {albumImages.length > 0 && (
+      <section class="space-y-4">
+        <h2 class="text-lg font-medium text-slate-800">全部照片</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+          {albumImages.map((image) => (
+            <figure class="overflow-hidden rounded-lg border border-slate-200 bg-white">
+              <img
+                src={image.url}
+                alt={image.alt || albumContent.title}
+                class="h-full w-full object-cover"
+                loading="lazy"
+              />
+              {image.caption && (
+                <figcaption class="p-3 text-sm text-slate-600">{image.caption}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+  </main>
+</Layout>

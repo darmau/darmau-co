@@ -1,0 +1,162 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Pagination from "@/components/Pagination.astro";
+import { supabase } from "@/lib/supabase";
+
+const imgUrl = import.meta.env.IMG_PREFIX;
+
+type ContentNode = {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: ContentNode[];
+};
+
+function extractFirstImageUrl(contentJson: any): string | null {
+  const content = Array.isArray(contentJson?.content)
+    ? contentJson.content
+    : Array.isArray(contentJson)
+      ? contentJson
+      : [];
+
+  const collectFirstImage = (nodes: ContentNode[]): string | null => {
+    for (const node of nodes) {
+      if (node?.type === "image" && node?.attrs?.prefix && node?.attrs?.storage_key) {
+        return `${node.attrs.prefix}/${node.attrs.storage_key}`;
+      }
+      if (Array.isArray(node?.content)) {
+        const found = collectFirstImage(node.content);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  return collectFirstImage(content);
+}
+
+const formatDate = (dateString?: string) =>
+  dateString
+    ? new Date(dateString).toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
+
+export async function getStaticPaths() {
+  const { count, error } = await supabase
+    .from("photo")
+    .select("language!inner (lang)", { count: "exact", head: true })
+    .eq("language.lang", "zh");
+
+  if (error) {
+    console.error("Error fetching album count:", error);
+    return [{ params: { page: "1" } }];
+  }
+
+  const totalPages = Math.max(1, Math.ceil((count || 0) / 24));
+  return Array.from({ length: totalPages }, (_, index) => ({
+    params: { page: String(index + 1) },
+  }));
+}
+
+const { page } = Astro.params;
+const currentPage = parseInt(page || "1", 10);
+
+const from = (currentPage - 1) * 24;
+const to = from + 24 - 1;
+
+const { data: albums, error } = await supabase
+  .from("photo")
+  .select(
+    "id, title, slug, abstract, published_at, content_json, cover (storage_key), category!inner (title), language!inner (lang)",
+  )
+  .eq("language.lang", "zh")
+  .order("published_at", { ascending: false })
+  .range(from, to);
+
+const { count: totalCount, error: countError } = await supabase
+  .from("photo")
+  .select("language!inner (lang)", { count: "exact", head: true })
+  .eq("language.lang", "zh");
+
+if (error) {
+  console.error("Error fetching albums:", error);
+}
+
+if (countError) {
+  console.error("Error fetching album count:", countError);
+}
+
+const total = totalCount || 0;
+const totalPages = Math.max(1, Math.ceil(total / 24));
+---
+
+<Layout
+  title={`摄影 - 第${currentPage}页 | 积薪(极简版)`}
+  description="浏览积薪的摄影作品集"
+  url={`https://darmau.design/albums/${currentPage}`}
+>
+  <main class="max-w-6xl mx-auto py-10 px-4">
+    <div class="mb-8">
+      <p class="text-sm text-slate-500 mb-2">摄影</p>
+      <h1 class="text-3xl font-medium text-slate-800">所有相册</h1>
+      <p class="text-slate-600 mt-2">每页展示24个相册封面，点击查看详情与完整照片。</p>
+    </div>
+
+    {
+      albums && albums.length > 0 ? (
+        <div class="columns-1 sm:columns-2 lg:columns-3 gap-4">
+          {albums.map((album) => {
+            const coverUrl = album.cover?.storage_key
+              ? `${imgUrl}cdn-cgi/image/format=auto,quality=85,width=1200,height=1500/${album.cover.storage_key}`
+              : extractFirstImageUrl(album.content_json);
+
+            return (
+              <a
+                href={`/album/${album.slug}`}
+                class="group mb-4 block break-inside-avoid overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <div class="aspect-[4/5] w-full bg-slate-100">
+                  {
+                    coverUrl ? (
+                      <img
+                        src={coverUrl}
+                        alt={album.title}
+                        class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="flex h-full items-center justify-center text-sm text-slate-400">
+                        暂无封面
+                      </div>
+                    )
+                  }
+                </div>
+                <div class="p-4 space-y-2">
+                  <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span>{album.category?.title || "摄影"}</span>
+                    <span aria-hidden="true">·</span>
+                    <time>{formatDate(album.published_at)}</time>
+                  </div>
+                  <h2 class="text-lg font-medium text-slate-800 group-hover:text-slate-900">
+                    {album.title}
+                  </h2>
+                  {album.abstract && <p class="text-sm text-slate-600">{album.abstract}</p>}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        <p class="text-slate-500">暂无摄影内容</p>
+      )
+    }
+
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      contextPath="albums"
+    />
+  </main>
+</Layout>
