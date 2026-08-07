@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "shinano-notifier",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-11-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    // 发件地址所属域名必须已经 onboard 到 Cloudflare Email Service
+    "MAIL_FROM": "noreply@auth.darmau.co",
+    "SITE_URL": "https://darmau.co"
+  },
+  "send_email": [
+    {
+      "name": "EMAIL"
+    }
+  ]
+  // secrets（用 `wrangler secret put <NAME>` 上传，本地放 .dev.vars）：
+  //   SUPABASE_URL
+  //   SUPABASE_SERVICE_ROLE_KEY
+  //   UNSUBSCRIBE_KEY        —— 必须和 apps/web 的同名 secret 一致
+  //   WEBHOOK_SECRET         —— Supabase 那边调用本 Worker 时的 Bearer token
+}

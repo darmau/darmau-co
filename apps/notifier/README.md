@@ -1,0 +1,63 @@
+# notifier
+
+评论 / 用户 / 站内信发生时的通知与富化 Worker。取代原来 `Darmau/supabase-edge-function`
+仓库里的三个 Supabase Edge Function。
+
+Cloudflare Worker 名：`shinano-notifier`。
+
+## 路由
+
+路由名沿用旧的 Edge Function 名，所以 Supabase 那边只需要把 URL 前缀从
+`https://<project>.supabase.co/functions/v1/` 换成本 Worker 的域名。
+
+| 路由 | 触发来源 | 行为 |
+| --- | --- | --- |
+| `POST /send-mail` | `comment` 表的 pg_net 触发器 | 有人回复了你的评论 → 发邮件通知 |
+| `POST /bark` | `comment` / `users` / `message` 表的 Database Webhook | Bark 推送到手机 |
+| `POST /ip-info` | `comment` 表的 Database Webhook | 查 ip-api.com，回填 `comment.ip_info` |
+| `GET /health` | — | 存活探针，不需要鉴权 |
+
+三条业务路由都要求 `Authorization: Bearer $WEBHOOK_SECRET`，否则 401。
+（旧的 Edge Function 靠 Supabase 网关校验 service role key，Worker 没有这层，所以自己校验。）
+
+## 与旧 Edge Function 的差异
+
+- **邮件从 Resend 换成 Cloudflare Email Service**（`send_email` binding，见 `src/lib/email.ts`）。
+  发信出口只有那一个文件，换回 Resend 只需要改它。
+- **退订 token 改用 `@darmau/shared/unsubscribe-token`**。以前签发方用 `jose`、验证方
+  （前台）用手写 WebCrypto，两份实现各写各的；现在共用一份，格式不可能再对不上。
+- **邮件正文里的用户内容做了 HTML 转义**。旧模板直接把 `content_text` 插进 HTML，
+  访客可控内容能注入标签。
+- 业务判断逻辑逐条照搬，没有改：根评论跳过、`receive_notification` 为 false 跳过、
+  INSERT 要求 `user_id` 且 `is_public`、UPDATE 只在 `is_public` 由 false 转 true 时发。
+
+## 本地调试
+
+```bash
+cp .dev.vars.example .dev.vars   # 填好再跑
+pnpm --filter notifier dev
+
+curl -X POST localhost:8787/ip-info \
+  -H "Authorization: Bearer $WEBHOOK_SECRET" \
+  -H 'Content-Type: application/json' \
+  -d '{"table":"comment","record":{"id":<真实评论id>,"ip":"1.1.1.1"}}'
+```
+
+## 部署
+
+```bash
+pnpm --filter notifier deploy
+pnpm --filter notifier exec wrangler secret put SUPABASE_URL
+pnpm --filter notifier exec wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+pnpm --filter notifier exec wrangler secret put UNSUBSCRIBE_KEY
+pnpm --filter notifier exec wrangler secret put WEBHOOK_SECRET
+```
+
+部署之后还要做的（都在 Cloudflare / Supabase 控制台，代码里做不了）：
+
+1. 把发件域名 onboard 到 Cloudflare Email Service（要求域名用 Cloudflare DNS）
+2. 在生产库设置 `app.settings.notifier_url` / `app.settings.notifier_secret`
+   （见 `packages/database/supabase/migrations/` 里那条 repoint 迁移的文件头）
+3. Supabase 控制台 → Database Webhooks：把 `bark` 和 `ip-info` 的目标改成本 Worker，
+   Header 换成 `Authorization: Bearer <WEBHOOK_SECRET>`
+4. 线上验证通过后，删掉 Supabase 上的三个旧 Edge Function

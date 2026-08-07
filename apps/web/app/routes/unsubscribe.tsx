@@ -1,7 +1,7 @@
 import type { MetaFunction } from "react-router";import { Form, useActionData, useLoaderData, useNavigation } from "react-router";
 import type { Route } from "./+types/unsubscribe";
 import { createClient } from "~/utils/supabase/server";
-import { verifyUnsubscribeToken } from "~/utils/unsubscribeToken.server";
+import { verifyUnsubscribeToken } from "@darmau/shared/unsubscribe-token";
 import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 type LoaderData = {

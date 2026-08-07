@@ -1,0 +1,18 @@
+{
+  "name": "@darmau/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./unsubscribe-token": "./src/unsubscribeToken.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@darmau/tsconfig": "workspace:*",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.6"
+  }
+}

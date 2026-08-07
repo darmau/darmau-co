@@ -1,0 +1,11 @@
+# 复制成 .dev.vars 后填真值（.dev.vars 已在 gitignore 里）。
+# 线上用 `pnpm --filter notifier exec wrangler secret put <NAME>` 上传。
+
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+
+# 必须和 apps/web 的同名 secret 完全一致，否则邮件里的退订链接验签会失败
+UNSUBSCRIBE_KEY=
+
+# Supabase 触发器 / Database Webhook 调用本 Worker 时带的 Bearer token，自己随便生成一个长随机串
+WEBHOOK_SECRET=

@@ -1,0 +1,25 @@
+{
+  "name": "notifier",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@darmau/database": "workspace:*",
+    "@darmau/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.87.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251212.0",
+    "@darmau/tsconfig": "workspace:*",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.6",
+    "wrangler": "4.54.0"
+  }
+}

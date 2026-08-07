@@ -2,7 +2,7 @@ import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicon
 import { Form, Link, useActionData, useLoaderData, useNavigation, useOutletContext } from "react-router";
 import type { Route } from "./+types/$lang.unsubscribe";
 import { createClient } from "~/utils/supabase/server";
-import { verifyUnsubscribeToken } from "~/utils/unsubscribeToken.server";
+import { verifyUnsubscribeToken } from "@darmau/shared/unsubscribe-token";
 import getLanguageLabel from "~/utils/getLanguageLabel";
 import UnsubscribeText from "~/locales/unsubscribe";
 import i18nLinks from "~/utils/i18nLinks";
