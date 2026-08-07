@@ -17,15 +17,19 @@ darmau.co 的 monorepo，用 [pnpm workspaces](https://pnpm.io/workspaces) + [Tu
 
 ```
 apps/
-  web/          前台（React Router 7 + Cloudflare Pages）
-  cms/          后台（SvelteKit + Cloudflare Workers）
+  web/          前台（React Router 7 + Cloudflare Pages，项目名 shinano-remix）
+  cms/          后台（SvelteKit + Cloudflare Workers，项目名 shinano-cms-worker）
   minimalist/   Astro 前台实验
+  notifier/     通知 Worker（项目名 shinano-notifier），取代原来的 Supabase Edge Function
 packages/
   database/     @darmau/database —— Supabase 迁移、config.toml、以及生成的 Database 类型
+  shared/       @darmau/shared —— 跨 app 共用的小工具（目前是退订 token）
   tsconfig/     @darmau/tsconfig —— 共享 tsconfig base
 ```
 
-`packages/database` 是 schema 与类型的唯一权威来源，详见 [packages/database/README.md](./packages/database/README.md)。
+`packages/database` 是 schema 与类型的唯一权威来源，详见
+[packages/database/README.md](./packages/database/README.md)。
+`apps/notifier` 的部署与线上切换步骤见 [apps/notifier/README.md](./apps/notifier/README.md)。
 
 ## 常用命令
 
