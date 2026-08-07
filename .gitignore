@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# turborepo
+.turbo/
+
+# build output
+dist/
+build/
+.svelte-kit/
+.astro/
+.react-router/
+.wrangler/
+.cloudflare/
+
+# environment
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# test artifacts
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# agent tooling
+.claude/settings.local.json
