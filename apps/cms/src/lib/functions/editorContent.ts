@@ -1,5 +1,5 @@
 import type { JSONContent } from '@tiptap/core';
-import type { Json } from '$lib/types/database';
+import type { Json } from '@darmau/database';
 
 const EMPTY_DOC: JSONContent = {
 	type: 'doc',

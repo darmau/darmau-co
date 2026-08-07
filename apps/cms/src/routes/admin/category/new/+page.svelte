@@ -6,7 +6,7 @@
 	import { browser } from '$app/environment';
 	import { getSupabaseBrowserClient } from '$lib/supabaseClient';
 	import type { SelectedImage } from '$lib/types/images';
-	import type { TablesInsert } from '$lib/types/database';
+	import type { TablesInsert } from '@darmau/database';
 
 	export let data;
 	const supabase = browser ? getSupabaseBrowserClient() : null;

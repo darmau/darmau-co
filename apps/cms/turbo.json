@@ -1,0 +1,22 @@
+{
+	"$schema": "https://turborepo.com/schema.json",
+	"extends": ["//"],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": [".svelte-kit/**"],
+			"inputs": ["$TURBO_DEFAULT$", ".env.local"],
+			"env": ["PUBLIC_SUPABASE_URL", "PUBLIC_SUPABASE_ANON_KEY", "URL_PREFIX", "BASE_URL"]
+		},
+		"check": {
+			"dependsOn": ["topo"],
+			"outputs": [".svelte-kit/**"],
+			"env": ["PUBLIC_SUPABASE_URL", "PUBLIC_SUPABASE_ANON_KEY", "URL_PREFIX", "BASE_URL"]
+		},
+		"test:integration": {
+			"dependsOn": ["build"],
+			"outputs": ["playwright-report/**", "test-results/**"],
+			"env": ["BASE_URL", "TEST_USER_EMAIL", "TEST_USER_PASSWORD"]
+		}
+	}
+}

@@ -12,7 +12,7 @@
 	import { browser } from '$app/environment';
 	import { getSupabaseBrowserClient } from '$lib/supabaseClient';
 	import type { TypedSupabaseClient } from '$lib/supabaseClient';
-	import type { TablesInsert } from '$lib/types/database';
+	import type { TablesInsert } from '@darmau/database';
 	import { toJsonColumn } from '$lib/functions/editorContent';
 	import type { Content } from '@tiptap/core';
 	import { splitHtmlByTopLevelNodes } from '$lib/functions/htmlChunk';

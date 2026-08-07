@@ -1,0 +1,43 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "topo": {
+      "dependsOn": ["^topo"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["build/**", ".react-router/**", ".svelte-kit/**", "dist/**", ".astro/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["topo"]
+    },
+    "format": {
+      "cache": false
+    },
+    "check": {
+      "dependsOn": ["topo"]
+    },
+    "typecheck": {
+      "dependsOn": ["topo"]
+    },
+    "test": {
+      "dependsOn": ["topo"]
+    },
+    "test:unit": {
+      "dependsOn": ["topo"]
+    },
+    "test:integration": {
+      "dependsOn": ["build"],
+      "outputs": ["playwright-report/**", "test-results/**"]
+    },
+    "deploy": {
+      "cache": false,
+      "dependsOn": ["build"]
+    }
+  }
+}

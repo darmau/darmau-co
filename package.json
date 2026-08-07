@@ -1,0 +1,22 @@
+{
+  "name": "darmau-co",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.17.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "check": "turbo run check",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "deploy": "turbo run deploy"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.8"
+  }
+}

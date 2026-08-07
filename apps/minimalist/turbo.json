@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".astro/**"],
+      "inputs": ["$TURBO_DEFAULT$", ".env"],
+      "env": ["SUPABASE_URL", "SUPABASE_ANON_KEY", "IMG_PREFIX"]
+    }
+  }
+}

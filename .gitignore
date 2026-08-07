@@ -44,3 +44,4 @@ pnpm-debug.log*
 
 # agent tooling
 .claude/settings.local.json
+/supabase/

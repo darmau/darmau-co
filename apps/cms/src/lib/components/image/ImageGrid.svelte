@@ -11,7 +11,7 @@
 	import { getSupabaseBrowserClient } from '$lib/supabaseClient';
 	import type { MediaImageRecord } from '$lib/api/media';
 	import type { ImageListItem } from '$lib/types/images';
-	import type { Json } from '$lib/types/database';
+	import type { Json } from '@darmau/database';
 
 	type ImageExif = Partial<{
 		Make: string;

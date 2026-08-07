@@ -1,7 +1,7 @@
 import {createClient} from "~/utils/supabase/server";
 import getLanguageLabel from "~/utils/getLanguageLabel";
 import HomepageText from '~/locales/homepage';
-import type {Json} from "~/types/supabase";
+import type {Json} from "@darmau/database";
 import type {FeedEnclosure, RichRssEntry} from "~/types/rss";
 import type { Route } from "./+types/$lang.article.[rss.xml]";
 

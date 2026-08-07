@@ -7,7 +7,7 @@ import getLanguageLabel from "~/utils/getLanguageLabel";
 import ThoughtText from "~/locales/thought";
 import i18nLinks from "~/utils/i18nLinks";
 import Subnav from "~/components/Subnav";
-import type {Json} from "~/types/supabase";
+import type {Json} from "@darmau/database";
 import {isJsonValue} from "~/utils/json";
 import {normalizeCommentCount} from "~/utils/articles";
 import { trackLoadMore } from "~/utils/zaraz";

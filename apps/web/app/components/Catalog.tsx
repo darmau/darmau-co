@@ -1,4 +1,4 @@
-import type {Json} from "~/types/supabase";
+import type {Json} from "@darmau/database";
 import type {Content} from "~/components/ContentContainer";
 import { Link } from "react-router";
 import ShareButton from "~/components/ShareButton";

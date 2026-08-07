@@ -1,6 +1,6 @@
 import {createServerClient, parseCookieHeader, serializeCookieHeader} from '@supabase/ssr';
 import type { AppLoadContext } from "react-router";
-import type {Database} from "~/types/supabase";
+import type {Database} from "@darmau/database";
 
 export function createClient(request: Request, context: AppLoadContext) {
   const headers = new Headers();

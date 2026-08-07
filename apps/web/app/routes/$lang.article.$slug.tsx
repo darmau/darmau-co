@@ -7,7 +7,7 @@ import getTime from "~/utils/getTime";
 import getLanguageLabel from "~/utils/getLanguageLabel";
 import ArticleText from '~/locales/article';
 import ContentContainer from "~/components/ContentContainer";
-import type {Json} from "~/types/supabase";
+import type {Json} from "@darmau/database";
 import Catalog from "~/components/Catalog";
 import ReadingProcess from "~/components/ReadingProcess";
 import type {NeighboringPost} from "~/components/NextAndPrev";

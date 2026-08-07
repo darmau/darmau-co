@@ -25,7 +25,7 @@
 		ArticleCoverImage,
 		ArticleEditorPageData
 	} from '$lib/types/article';
-	import type { TablesInsert } from '$lib/types/database';
+	import type { TablesInsert } from '@darmau/database';
 	import type {
 		EditorContentUpdateDetail,
 		EditorHandle,

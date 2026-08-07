@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "typecheck": {
+      // `react-router typegen` 和 `react-router build` 写同一个 .react-router/ 目录，
+      // 并行跑会互相踩（tsc 读到写了一半的类型）。让 typecheck 排在 build 之后即可，
+      // typegen 本身很快，build 有缓存时几乎没有额外代价。
+      "dependsOn": ["build"]
+    }
+  }
+}

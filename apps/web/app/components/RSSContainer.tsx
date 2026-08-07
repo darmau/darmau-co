@@ -1,4 +1,4 @@
-import type { Json } from "~/types/supabase";
+import type { Json } from "@darmau/database";
 
 type ContentStructure = {
   content: Content[];

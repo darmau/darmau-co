@@ -5,7 +5,7 @@ import getLanguageLabel from "~/utils/getLanguageLabel";
 import ThoughtText from "~/locales/thought";
 import {createClient} from "~/utils/supabase/server";
 import type { Route } from "./+types/$lang.thought.$slug";
-import type {Json} from "~/types/supabase";
+import type {Json} from "@darmau/database";
 import ContentContainer from "~/components/ContentContainer";
 import ResponsiveImage from "~/components/ResponsiveImage";
 import type {Image} from "~/types/Image";

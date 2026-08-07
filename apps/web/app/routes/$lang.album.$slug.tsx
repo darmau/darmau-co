@@ -1,7 +1,7 @@
 import { createClient } from "~/utils/supabase/server";
 import { Link, useActionData, useLoaderData, useOutletContext, useRouteLoaderData, useLocation } from "react-router";
 import type { Route } from "./+types/$lang.album.$slug";
-import type { Json } from "~/types/supabase";
+import type { Json } from "@darmau/database";
 import ContentContainer from "~/components/ContentContainer";
 import getTime from "~/utils/getTime";
 import type { AlbumPhoto } from "~/components/GallerySlide";

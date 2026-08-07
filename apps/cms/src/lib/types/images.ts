@@ -1,4 +1,4 @@
-import type { Tables } from './database';
+import type { Tables } from '@darmau/database';
 
 export type { SelectedImage } from './editor';
 

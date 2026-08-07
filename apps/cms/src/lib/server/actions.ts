@@ -1,6 +1,6 @@
 import { fail, type ActionFailure } from '@sveltejs/kit';
 import type { TypedSupabaseClient } from '$lib/supabaseClient';
-import type { Database } from '$lib/types/database';
+import type { Database } from '@darmau/database';
 
 type TableName = keyof Database['public']['Tables'];
 

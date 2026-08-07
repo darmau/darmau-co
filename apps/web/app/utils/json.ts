@@ -1,4 +1,4 @@
-import type {Json} from "~/types/supabase";
+import type {Json} from "@darmau/database";
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
     typeof value === "object" && value !== null && !Array.isArray(value);

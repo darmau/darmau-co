@@ -1,7 +1,14 @@
-# 数据库变更工作流
+# @darmau/database —— 数据库 schema 与共享类型
 
-这个目录是 schema 的**唯一权威来源**。`src/migration/init.sql` 已被降级为
-`supabase/legacy/init_snapshot.sql`（只当历史文档看，不要执行、不要再编辑）。
+这个包是 schema 的**唯一权威来源**，也是 monorepo 里唯一一份 Supabase 生成类型的来源。
+`apps/web` 和 `apps/cms` 都从 `@darmau/database` 导入 `Database` / `Json` / `Tables` 等类型，
+不再各自维护副本（合并前两边是逐字节相同的 2036 行文件，靠手工同步）。
+
+原 CMS 里的 `src/migration/init.sql` 已被降级为 `supabase/legacy/init_snapshot.sql`
+（只当历史文档看，不要执行、不要再编辑）。
+
+**所有 `pnpm db:*` 命令都要在 `packages/database/` 目录下执行**，或者从仓库根目录用
+`pnpm --filter @darmau/database db:xxx`。
 
 之所以要建立这套工作流，是因为 2026-08-07 的审查中实测确认：手工维护的 `init.sql`
 与生产库已经漂移（它声明了 `comment.upvote` / `comment.downvote`，生产库根本没有这两列；
@@ -12,13 +19,14 @@
 
 ## 目录结构
 
-| 路径                        | 用途                                                            |
-| --------------------------- | --------------------------------------------------------------- |
-| `migrations/`               | 版本化迁移，按文件名时间戳顺序执行。**只增不改**                |
-| `config.toml`               | Supabase CLI 配置（本地开发容器、Auth、Storage 等）             |
-| `inspect_schema.sql`        | 只读探查脚本，粘进 SQL Editor 就能拿到生产库的真实形态          |
-| `tests/run.sh`              | 在一次性本地 Postgres 里重放全部迁移并断言行为（只需 Docker）   |
-| `legacy/init_snapshot.sql`  | 历史快照，仅供考古。**不要执行**                                |
+| 路径                                 | 用途                                                          |
+| ------------------------------------ | ------------------------------------------------------------- |
+| `src/index.ts`                       | `supabase gen types` 生成的类型，包的唯一导出。**不要手改**   |
+| `supabase/migrations/`               | 版本化迁移，按文件名时间戳顺序执行。**只增不改**              |
+| `supabase/config.toml`               | Supabase CLI 配置（本地开发容器、Auth、Storage 等）           |
+| `supabase/inspect_schema.sql`        | 只读探查脚本，粘进 SQL Editor 就能拿到生产库的真实形态        |
+| `supabase/tests/run.sh`              | 在一次性本地 Postgres 里重放全部迁移并断言行为（只需 Docker） |
+| `supabase/legacy/init_snapshot.sql`  | 历史快照，仅供考古。**不要执行**                              |
 
 CLI 已作为 devDependency 安装，所有命令都通过 `pnpm` 调用，无需全局安装。
 
@@ -79,7 +87,7 @@ pnpm db:push
 ## 生成数据库类型（P2-1 会用到）
 
 ```bash
-pnpm db:types                    # → src/lib/types/database.ts
+pnpm db:types                    # → src/index.ts
 ```
 
 ---

@@ -1,0 +1,25 @@
+{
+  "name": "@darmau/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "db:link": "supabase link",
+    "db:pull": "supabase db pull",
+    "db:diff": "supabase db diff -f",
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:test": "./supabase/tests/run.sh",
+    "db:types": "supabase gen types typescript --linked --schema public > src/index.ts"
+  },
+  "devDependencies": {
+    "@darmau/tsconfig": "workspace:*",
+    "supabase": "^2.112.0",
+    "typescript": "^5.9.3"
+  }
+}

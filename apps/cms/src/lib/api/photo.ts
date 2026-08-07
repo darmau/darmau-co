@@ -1,5 +1,5 @@
 import type { TypedSupabaseClient } from '$lib/supabaseClient';
-import type { Json, TablesInsert } from '$lib/types/database';
+import type { Json, TablesInsert } from '@darmau/database';
 
 export type AlbumImageInput = {
 	image_id: number;
