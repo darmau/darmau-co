@@ -1,0 +1,46 @@
+---
+import HeroSection from "@/components/HeroSection.astro";
+import Layout from "@/layouts/Layout.astro";
+import { supabase } from "@/lib/supabase";
+import ArticleCard from "@/components/ArticleCard.astro";
+
+const { data: articles, error } = await supabase
+	.from("article")
+	// 根据lang字段去language表查询对应的language.lang
+	.select(
+		"title, subtitle, slug, published_at, is_premium, is_featured, language!inner (lang), category!inner (title)",
+	)
+	.eq("language.lang", "zh")
+	.order("published_at", { ascending: false })
+	.limit(10);
+
+if (error) {
+	console.error("Error fetching articles:", error);
+}
+---
+
+<Layout
+	title="积薪(极简版)"
+	description="本站为积薪https://darmau.co的境内特供版，提供给不能科学上网的用户基本的阅读功能。完整体验和互动建议访问主站。"
+	url="https://darmau.design"
+>
+	<HeroSection />
+	<main style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+		<h2>文章列表</h2>
+		{
+			error ? (
+				<p style="color: red;">获取文章失败: {error.message}</p>
+			) : articles && articles.length > 0 ? (
+				<>
+					<ul class="flex flex-col gap-3">
+						{articles.map((article) => (
+							<ArticleCard {...article} />
+						))}
+					</ul>
+				</>
+			) : (
+				<p>暂无文章</p>
+			)
+		}
+	</main>
+</Layout>
