@@ -1,0 +1,42 @@
+import type { PageServerLoad } from './$types';
+import { error } from '@sveltejs/kit';
+import { URL_PREFIX } from '$env/static/private';
+import { parseIdParam } from '$lib/server/params';
+
+export const load: PageServerLoad = async ({ params, locals: { supabase } }) => {
+	const thoughtId = parseIdParam(params.id, '想法');
+
+	const { data: thoughtData, error: thoughtError } = await supabase
+		.from('thought')
+		.select(
+			`
+	  id,
+	  content_json,
+	  content_html,
+	  content_text,
+	  push_to_gallery,
+	  thought_image (order, image (id, alt, storage_key))
+  `
+		)
+		.eq('id', thoughtId)
+		.single();
+
+	if (thoughtError) {
+		console.error('Error fetching thought data:', thoughtError);
+		error(thoughtError.code === 'PGRST116' ? 404 : 500, { message: thoughtError.message });
+	}
+
+	const thoughtContent = {
+		id: thoughtData!.id,
+		content_json: thoughtData!.content_json,
+		content_html: thoughtData!.content_html,
+		content_text: thoughtData!.content_text,
+		push_to_gallery: thoughtData!.push_to_gallery ?? false,
+		images: thoughtData?.thought_image
+	};
+
+	return {
+		prefix: URL_PREFIX,
+		thoughtContent
+	};
+};

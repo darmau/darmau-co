@@ -1,0 +1,172 @@
+<script lang="ts">
+	import { getToastStore } from '$lib/toast';
+	import { ThirdPartyAPIs } from '$lib/types/thirdPartyApi';
+	import { browser } from '$app/environment';
+	import { getSupabaseBrowserClient } from '$lib/supabaseClient';
+	import { invalidateAll } from '$app/navigation';
+
+	export let data: { apiConfig: Record<string, string> };
+
+	const toastStore = getToastStore();
+	const supabase = browser ? getSupabaseBrowserClient() : null;
+
+	const apis = new ThirdPartyAPIs();
+	let API = apis.emptyObject();
+	const KEYS = apis.array();
+
+	// 从 data 初始化 API
+	$: {
+		KEYS.forEach((key) => {
+			API[key] = data.apiConfig[key] ?? '';
+		});
+	}
+
+	// 该变量负责记录表单是否被修改，如果修改，则为true
+	let isFormChanged = false;
+
+	// 提交表单
+	async function submitForm(event: Event) {
+		event.preventDefault();
+		const formData = new FormData(event.target as HTMLFormElement);
+		const storageData = Object.fromEntries(formData.entries()) as Record<
+			string,
+			FormDataEntryValue
+		>;
+
+		// 将对象中的key-value转换成独立的对象，最后拼接成数组
+		if (!supabase) return;
+
+		const arrayData = (Object.entries(storageData) as [string, FormDataEntryValue][]).map(
+			([key, value]) => ({
+				key,
+				value: typeof value === 'string' ? value : String(value ?? '')
+			})
+		);
+
+		const { error: upsertError } = await supabase
+			.from('config')
+			.upsert(arrayData, { onConflict: 'key' });
+
+		if (upsertError) {
+			console.error(upsertError);
+			toastStore.trigger({
+				message: '更新 API 配置失败',
+				background: 'variant-filled-error'
+			});
+			return;
+		}
+
+		toastStore.trigger({
+			message: 'API 配置更新成功',
+			hideDismiss: true,
+			background: 'variant-filled-success'
+		});
+
+		isFormChanged = false;
+		await invalidateAll();
+	}
+</script>
+
+<main class="py-8">
+	<form
+		method="POST"
+		on:submit={submitForm}
+		on:input={() => (isFormChanged = true)}
+		class="space-y-6"
+	>
+		<div class="border-b border-gray-900/10 pb-12 space-y-4">
+			<div>
+				<label for="unsplash_access_key" class="block text-sm font-medium leading-6 text-gray-900">
+					Unsplash Access Key
+				</label>
+				<input
+					type="text"
+					id="unsplash_access_key"
+					name="config_UNSPLASH_ACCESS_KEY"
+					bind:value={API.config_UNSPLASH_ACCESS_KEY}
+					class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
+				/>
+				<p class="mt-2 text-sm text-gray-500">
+					如果你希望利用 Unsplash API 为文章添加图片，需要在此填写 Unsplash API Key
+				</p>
+			</div>
+			<div>
+				<label for="unsplash_secret_key" class="block text-sm font-medium leading-6 text-gray-900">
+					Unsplash Secret Key
+				</label>
+				<input
+					type="text"
+					id="unsplash_secret_key"
+					name="config_UNSPLASH_SECRET_KEY"
+					bind:value={API.config_UNSPLASH_SECRET_KEY}
+					class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
+				/>
+			</div>
+		</div>
+		<div class="border-b border-gray-900/10 pb-8 space-y-4">
+			<div>
+				<label for="mapbox" class="block text-sm font-medium leading-6 text-gray-900">
+					Mapbox
+				</label>
+				<input
+					type="text"
+					id="mapbox"
+					name="config_MAPBOX"
+					bind:value={API.config_MAPBOX}
+					class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
+				/>
+				<p class="mt-2 text-sm text-gray-500">
+					用于查找图片的拍摄地点
+				</p>
+			</div>
+			<div>
+				<label for="amap" class="block text-sm font-medium leading-6 text-gray-900">
+					高德地图
+				</label>
+				<input
+					type="text"
+					id="amap"
+					name="config_AMAP"
+					bind:value={API.config_AMAP}
+					class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
+				/>
+				<p class="mt-2 text-sm text-gray-500">
+					如果你的图片在中国拍摄，建议使用高德地图 API
+				</p>
+			</div>
+		</div>
+		<div class="border-b border-gray-900/10 pb-8">
+			<label for="resend" class="block text-sm font-medium leading-6 text-gray-900"> Resend </label>
+			<input
+				type="text"
+				id="resend"
+				name="config_RESEND"
+				bind:value={API.config_RESEND}
+				class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
+			/>
+			<p class="mt-2 text-sm text-gray-500">
+				用于给用户发送被评论通知
+			</p>
+		</div>
+		<div class="border-b border-gray-900/10 pb-8">
+			<label for="bark" class="block text-sm font-medium leading-6 text-gray-900"> Bark </label>
+			<input
+				type="text"
+				id="resend"
+				name="config_BARK_SERVER"
+				bind:value={API.config_BARK_SERVER}
+				class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
+			/>
+			<p class="mt-2 text-sm text-gray-500">
+				用于给管理员发送通知
+			</p>
+		</div>
+		<button
+			type="submit"
+			disabled={!isFormChanged}
+			class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:bg-gray-200"
+		>
+			提交
+		</button>
+	</form>
+</main>

@@ -1,0 +1,200 @@
+<script lang="ts">
+	import Pagination from '$components/Pagination.svelte';
+	import PageTitle from '$components/PageTitle.svelte';
+	import { getToastStore } from '$lib/toast';
+	import ArticleIcon from '$assets/icons/document-text.svelte';
+	import getDateFormat from '$lib/functions/dateFormat';
+	import { callAction } from '$lib/api/actions';
+	import type { ThoughtListPageData } from '$lib/types/thought';
+
+	export let data: ThoughtListPageData;
+
+	const toastStore = getToastStore();
+
+	let selectedThoughtList: number[] = [];
+	let deletable = true;
+
+	async function deleteThoughts(): Promise<void> {
+		if (!selectedThoughtList.length) {
+			return;
+		}
+
+		if (!confirm(`确认删除选中的 ${selectedThoughtList.length} 项想法吗？此操作不可撤销。`)) {
+			return;
+		}
+
+		const result = await callAction('?/delete', { id: selectedThoughtList });
+
+		if (result.ok) {
+			selectedThoughtList = [];
+			deletable = true;
+		}
+
+		toastStore.trigger({
+			message: result.ok ? '成功删除想法。' : result.message,
+			hideDismiss: true,
+			background: result.ok ? 'variant-filled-success' : 'variant-filled-error'
+		});
+	}
+
+	async function deleteThought(id: number): Promise<void> {
+		if (!confirm(`确认删除这想法吗？此操作不可撤销。`)) {
+			return;
+		}
+
+		const result = await callAction('?/delete', { id });
+
+		toastStore.trigger({
+			message: result.ok ? '成功删除想法' : result.message,
+			hideDismiss: true,
+			background: result.ok ? 'variant-filled-success' : 'variant-filled-error'
+		});
+	}
+
+	function switchSelectAll(): void {
+		const checkboxes = document.querySelectorAll<HTMLInputElement>('.thought-checkbox');
+		if (selectedThoughtList.length === data.thoughts.length) {
+			checkboxes.forEach((checkbox) => {
+				checkbox.checked = false;
+			});
+			selectedThoughtList = [];
+			deletable = true;
+		} else {
+			checkboxes.forEach((checkbox) => {
+				checkbox.checked = true;
+			});
+			selectedThoughtList = data.thoughts.map((thought) => thought.id);
+			deletable = false;
+		}
+	}
+
+	function toggleThoughtSelection(thoughtId: number, isChecked: boolean): void {
+		if (isChecked) {
+			if (!selectedThoughtList.includes(thoughtId)) {
+				selectedThoughtList = [...selectedThoughtList, thoughtId];
+			}
+		} else {
+			selectedThoughtList = selectedThoughtList.filter((id) => id !== thoughtId);
+		}
+		deletable = selectedThoughtList.length === 0;
+	}
+</script>
+
+<svelte:head>
+	<title>想法</title>
+</svelte:head>
+
+<div>
+	<PageTitle title="想法" />
+
+	<div class="flex gap-4 items-center justify-between">
+		<button
+			type="button"
+			disabled={deletable}
+			on:click={deleteThoughts}
+			class="inline-flex justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto disabled:bg-gray-300"
+		>
+			删除
+		</button>
+		<a
+			href="/admin/thought/new"
+			data-sveltekit-reload
+			class="inline-flex justify-between gap-2 rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
+		>
+			创建
+		</a>
+	</div>
+
+	<div class="mt-8 flow-root">
+		{#if data.thoughts.length > 0}
+			<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+				<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+					<div class="overflow-hidden shadow ring-1 ring-gray-200 sm:rounded-lg">
+						<table class="min-w-full divide-y divide-gray-300">
+							<thead class="bg-zinc-100">
+								<tr>
+									<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+										<input
+											on:click={switchSelectAll}
+											type="checkbox"
+											class="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-600"
+										/>
+									</th>
+									<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+										正文
+									</th>
+									<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+										照片数量
+									</th>
+									<th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+										发布时间
+									</th>
+									<th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+										<span class="sr-only">编辑</span>
+									</th>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-gray-200 bg-white">
+								<!--文章数据-->
+								{#each data.thoughts as thought (thought.id)}
+									<tr class="even:bg-gray-50 hover:bg-gray-100 cursor-cell">
+										<td class="px-3 py-4 text-sm text-gray-500">
+											<input
+												on:change={(event) => {
+													const input = event.currentTarget as HTMLInputElement;
+													toggleThoughtSelection(thought.id, input.checked);
+												}}
+												type="checkbox"
+												class="thought-checkbox h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-600"
+											/>
+										</td>
+										<td class="px-3 py-4 text-sm text-gray-500 line-clamp-2"
+											>{thought.content_text}
+										</td>
+										<td class="font-mono px-3 py-4 text-sm text-gray-500"
+											>{thought.thought_image[0].count}
+										</td>
+										<td class="px-3 py-4 text-sm text-gray-500"
+											>{getDateFormat(thought.created_at, true)}</td
+										>
+
+										<td
+											class="relative whitespace-nowrap py-4 pl-3 pr-4 space-x-4 text-right text-sm font-medium sm:pr-6"
+										>
+											<a
+												href={`/admin/thought/edit/${thought.id}`}
+												class="text-cyan-600 hover:text-cyan-900">编辑</a
+											>
+											<button
+												on:click={() => deleteThought(thought.id)}
+												class="text-red-600 hover:text-red-900"
+											>
+												删除
+											</button>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		{:else}
+			<div class="flex flex-col items-center justify-center text-center min-h-80">
+				<ArticleIcon classList="mx-auto h-12 w-12 text-gray-400" />
+				<h3 class="mt-2 text-sm font-semibold text-gray-900">No thoughts</h3>
+				<div class="mt-6">
+					<a
+						href="/admin/thought/new"
+						data-sveltekit-reload
+						class="inline-flex items-center rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
+					>
+						创建
+					</a>
+				</div>
+			</div>
+		{/if}
+	</div>
+</div>
+
+<Pagination count={data.count} page={data.page} limit={data.limit} path={data.path} />

@@ -1,0 +1,327 @@
+<script lang="ts">
+	import SimpleEditor from '$components/editor/SimpleEditor.svelte';
+	import ImagesModel from '$components/editor/ImagesModel.svelte';
+	import AddIcon from '$assets/icons/plus.svelte';
+	import DeleteIcon from '$assets/icons/delete.svelte';
+	import { getToastStore } from '$lib/toast';
+	import { goto } from '$app/navigation';
+	import { flip } from 'svelte/animate';
+	import { browser } from '$app/environment';
+	import { getSupabaseBrowserClient } from '$lib/supabaseClient';
+	import { toJsonColumn } from '$lib/functions/editorContent';
+	import type { TypedSupabaseClient } from '$lib/supabaseClient';
+	import type { EditorContentUpdateDetail, ImagesModelData } from '$lib/types/editor';
+	import type { SelectedImage } from '$lib/types/photo';
+	import type {
+		ThoughtContent,
+		ThoughtImage,
+		ThoughtImageInsert,
+		ThoughtPageData
+	} from '$lib/types/thought';
+
+	export let data: ThoughtPageData;
+	const supabase: TypedSupabaseClient | null = browser ? getSupabaseBrowserClient() : null;
+
+	let imagesModelData: ImagesModelData = {
+		supabase,
+		prefix: data.prefix
+	};
+
+	$: imagesModelData = {
+		supabase,
+		prefix: data.prefix
+	};
+
+	const toastStore = getToastStore();
+
+	let thoughtContent: ThoughtContent = {
+		...data.thoughtContent,
+		images: [...(data.thoughtContent.images ?? [])],
+		push_to_gallery: data.thoughtContent.push_to_gallery ?? false
+	};
+
+	let contentJSON: Record<string, unknown> = thoughtContent.content_json ?? {};
+	let contentHTML: string = thoughtContent.content_html;
+	let contentText: string = thoughtContent.content_text;
+
+	function handleContentUpdate({ json, html, text }: EditorContentUpdateDetail): void {
+		contentJSON = json;
+		contentHTML = html;
+		contentText = text;
+		thoughtContent = {
+			...thoughtContent,
+			content_json: contentJSON,
+			content_html: contentHTML,
+			content_text: contentText
+		};
+	}
+
+	let isModalOpen = false;
+
+	function closeModel(): void {
+		isModalOpen = false;
+	}
+
+	function mapSelectedImageToThought(image: SelectedImage, order: number): ThoughtImage {
+		return {
+			order,
+			image: {
+				id: image.id,
+				alt: image.alt,
+				storage_key: image.storage_key,
+				caption: image.caption ?? null,
+				prefix: image.prefix
+			}
+		};
+	}
+
+	function selectPictures(images: SelectedImage[]): void {
+		const remainingSlots = Math.max(0, 12 - thoughtContent.images.length);
+		const imagesToAdd = images
+			.slice(0, remainingSlots)
+			.map((image, index) =>
+				mapSelectedImageToThought(image, thoughtContent.images.length + index + 1)
+			);
+		thoughtContent = {
+			...thoughtContent,
+			images: [...thoughtContent.images, ...imagesToAdd]
+		};
+	}
+
+	function deleteImage(index: number): void {
+		const updatedImages = thoughtContent.images
+			.filter((_, currentIndex) => currentIndex !== index)
+			.map((picture, orderIndex) => ({
+				...picture,
+				order: orderIndex + 1
+			}));
+
+		thoughtContent = {
+			...thoughtContent,
+			images: updatedImages
+		};
+	}
+
+	let draggingIndex: number | null = null;
+
+	function dragStart(event: DragEvent, index: number): void {
+		draggingIndex = index;
+		event.dataTransfer?.setData('text/plain', index.toString());
+	}
+
+	function dragOver(event: DragEvent, index: number): void {
+		event.preventDefault();
+		if (draggingIndex === null || draggingIndex === index) {
+			return;
+		}
+
+		const newPictures = [...thoughtContent.images];
+		const [removed] = newPictures.splice(draggingIndex, 1);
+		if (!removed) {
+			return;
+		}
+		newPictures.splice(index, 0, removed);
+		thoughtContent = {
+			...thoughtContent,
+			images: newPictures.map((picture, orderIndex) => ({
+				...picture,
+				order: orderIndex + 1
+			}))
+		};
+		draggingIndex = index;
+	}
+
+	function dragEnd(): void {
+		draggingIndex = null;
+	}
+
+	function togglePushToGallery(): void {
+		thoughtContent = {
+			...thoughtContent,
+			push_to_gallery: !thoughtContent.push_to_gallery
+		};
+	}
+
+	async function postThought(): Promise<void> {
+		if (!supabase) {
+			return;
+		}
+
+		const { data: saveThoughtData, error: saveThoughtError } = await supabase
+			.from('thought')
+			.insert({
+				content_json: toJsonColumn(thoughtContent.content_json),
+				content_html: thoughtContent.content_html,
+				content_text: thoughtContent.content_text,
+				push_to_gallery: thoughtContent.push_to_gallery
+			})
+			.select('id')
+			.limit(1);
+
+		const newThoughtId = saveThoughtData?.[0]?.id;
+
+		if (saveThoughtError || !newThoughtId) {
+			console.error(saveThoughtError);
+			toastStore.trigger({
+				message: `保存thought失败。${saveThoughtError?.message ?? ''}`.trim(),
+				hideDismiss: true,
+				background: 'variant-filled-error'
+			});
+			return;
+		}
+
+		const thoughtImages: ThoughtImageInsert[] = thoughtContent.images.map((image, index) => ({
+			thought_id: newThoughtId,
+			image_id: image.image.id,
+			order: index + 1
+		}));
+
+		if (thoughtImages.length) {
+			const { error: saveThoughtImageError } = await supabase
+				.from('thought_image')
+				.insert(thoughtImages);
+
+			if (saveThoughtImageError) {
+				console.error(saveThoughtImageError);
+				toastStore.trigger({
+					message: `保存thought_image失败。${saveThoughtImageError.message}`,
+					hideDismiss: true,
+					background: 'variant-filled-error'
+				});
+				return;
+			}
+		}
+
+		toastStore.trigger({
+			message: '保存thought成功。',
+			hideDismiss: true,
+			background: 'variant-filled-success'
+		});
+		await goto('/admin/thought/1');
+	}
+</script>
+
+{#if isModalOpen}
+	<ImagesModel data={imagesModelData} {closeModel} onSelect={selectPictures} />
+{/if}
+
+<div class="max-w-3xl mx-auto">
+	<nav class="flex mb-8" aria-label="Breadcrumb">
+		<ol role="list" class="flex items-center space-x-4">
+			<li>
+				<div>
+					<a data-sveltekit-preload-data href="/admin" class="text-gray-400 hover:text-gray-500">
+						<svg
+							class="h-5 w-5 flex-shrink-0"
+							viewBox="0 0 20 20"
+							fill="currentColor"
+							aria-hidden="true"
+						>
+							<path
+								fill-rule="evenodd"
+								d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z"
+								clip-rule="evenodd"
+							/>
+						</svg>
+						<span class="sr-only">首页</span>
+					</a>
+				</div>
+			</li>
+			<li>
+				<div class="flex items-center">
+					<svg
+						class="h-5 w-5 flex-shrink-0 text-gray-300"
+						fill="currentColor"
+						viewBox="0 0 20 20"
+						aria-hidden="true"
+					>
+						<path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+					</svg>
+					<a
+						data-sveltekit-preload-data
+						href="/admin/thought/1"
+						class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">想法</a
+					>
+				</div>
+			</li>
+		</ol>
+	</nav>
+
+	<div class="space-y-6">
+		<!--内容-->
+		<SimpleEditor onContentUpdate={handleContentUpdate} content={thoughtContent.content_json} />
+
+		<!--图片-->
+		<div>
+			<label for="add-image" class="text-sm font-medium leading-6 text-gray-900">图片</label>
+			<div class="relative mt-2 grid grid-cols-2 md:grid-cols-3 gap-4">
+				{#if thoughtContent.images.length < 12}
+					<button
+						type="button"
+						id="add-image"
+						on:click={() => {
+							isModalOpen = true;
+						}}
+						class="border border-gray-200 rounded-md aspect-square flex justify-center items-center bg-white group hover:bg-gray-100"
+					>
+						<AddIcon classList="w-8 h-8 text-gray-700 group-hover:text-gray-400" />
+					</button>
+				{/if}
+				{#each thoughtContent.images as picture, index (picture.image.id)}
+					<div
+						class="relative aspect-square rounded-md overflow-hidden border border-gray-100"
+						role="listitem"
+						aria-grabbed={draggingIndex === index ? 'true' : 'false'}
+						draggable={true}
+						on:dragstart={(event) => dragStart(event, index)}
+						on:dragover={(event) => dragOver(event, index)}
+						on:dragend={dragEnd}
+						animate:flip={{ duration: 100 }}
+					>
+						<img
+							src={`${data.prefix}/cdn-cgi/image/format=auto,width=480/${picture.image.storage_key}`}
+							alt={picture.image.alt}
+							class="img-bg h-full w-full object-contain"
+						/>
+						<button on:click={() => deleteImage(index)} class="absolute top-4 right-4">
+							<DeleteIcon classList="h-6 w-6 text-gray-400 hover:text-red-600" />
+						</button>
+					</div>
+				{/each}
+			</div>
+		</div>
+
+		<!--推送到图集-->
+		<div class="flex items-center justify-between">
+			<div>
+				<span class="text-sm font-medium leading-6 text-gray-900">推送到Gallery</span>
+				<p class="text-sm text-gray-500">开启后会在图集中展示该想法。</p>
+			</div>
+			<button
+				type="button"
+				role="switch"
+				aria-checked={thoughtContent.push_to_gallery}
+				on:click={togglePushToGallery}
+				class={`${
+					thoughtContent.push_to_gallery ? 'bg-cyan-600' : 'bg-gray-200'
+				} relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2`}
+			>
+				<span class="sr-only">推送到Gallery</span>
+				<span
+					class={`${
+						thoughtContent.push_to_gallery ? 'translate-x-5' : 'translate-x-0'
+					} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+				></span>
+			</button>
+		</div>
+
+		<!--保存-->
+		<button
+			type="button"
+			on:click={postThought}
+			class="flex w-full justify-center rounded-md bg-cyan-600 p-3 text-base font-semibold leading-6 text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
+		>
+			保存
+		</button>
+	</div>
+</div>
