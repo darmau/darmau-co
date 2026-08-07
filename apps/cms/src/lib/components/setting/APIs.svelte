@@ -136,23 +136,10 @@
 			</div>
 		</div>
 		<div class="border-b border-gray-900/10 pb-8">
-			<label for="resend" class="block text-sm font-medium leading-6 text-gray-900"> Resend </label>
-			<input
-				type="text"
-				id="resend"
-				name="config_RESEND"
-				bind:value={API.config_RESEND}
-				class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
-			/>
-			<p class="mt-2 text-sm text-gray-500">
-				用于给用户发送被评论通知
-			</p>
-		</div>
-		<div class="border-b border-gray-900/10 pb-8">
 			<label for="bark" class="block text-sm font-medium leading-6 text-gray-900"> Bark </label>
 			<input
 				type="text"
-				id="resend"
+				id="bark"
 				name="config_BARK_SERVER"
 				bind:value={API.config_BARK_SERVER}
 				class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
