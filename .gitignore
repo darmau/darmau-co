@@ -18,8 +18,10 @@ build/
 .env
 .env.*
 !.env.example
-# apps/cms/.env 是构建期用的非密钥变量，需要进仓库（见文件头注释）
+# apps/cms/.env 和 apps/minimalist/.env 是构建期用的非密钥变量，需要进仓库
+# （见各自文件头注释）。密钥和本地覆盖一律走 .env.local / .dev.vars。
 !apps/cms/.env
+!apps/minimalist/.env
 .dev.vars
 .dev.vars.*
 !.dev.vars.example

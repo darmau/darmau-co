@@ -16,6 +16,10 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+# .env 是构建期用的非密钥变量，需要进仓库（见该文件头部注释）。
+# 本地覆盖和密钥写 .env.local，它仍然被忽略。
+!.env
+.env.local
 
 # macOS-specific files
 .DS_Store
