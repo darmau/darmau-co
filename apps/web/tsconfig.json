@@ -10,7 +10,9 @@
 		"sourceMap": true,
 		"strict": true,
 		"moduleResolution": "bundler",
-		"types": ["@cloudflare/workers-types"]
+		// geojson 是 mapbox-gl 类型定义的隐式依赖：它的 d.ts 直接引用全局
+		// GeoJSON 命名空间却不声明依赖，而 types 白名单会挡掉自动引入
+		"types": ["@cloudflare/workers-types", "geojson"]
 	}
 	// 路径别名统一在 svelte.config.js 的 kit.alias 里配，$lib 由 kit.files 提供
 }
