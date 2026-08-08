@@ -37,12 +37,13 @@ export async function handleBark(request: Request, env: Env): Promise<Response> 
 	});
 
 	if (!barkResponse.ok) {
-		const responseText = await barkResponse.text();
-		console.error('Bark 服务返回错误:', barkResponse.status, responseText);
-		return fail('Bark 服务调用失败', 502, { status: barkResponse.status, response: responseText });
+		// 第三方响应体可能带 Bark 的 device key 等敏感片段，只落日志
+		console.error('Bark 服务返回错误:', barkResponse.status, await barkResponse.text());
+		return fail('Bark 服务调用失败', 502);
 	}
 
-	return json({ success: true, barkUrl });
+	// 同理不回显 barkUrl——它本身就包含 Bark 推送地址里的密钥段
+	return json({ success: true });
 }
 
 async function buildSegments(
@@ -87,9 +88,66 @@ async function resolveUserName(client: Client, userId: number | null): Promise<s
 	return name ? name : null;
 }
 
+/**
+ * 校验 Bark 服务地址。
+ *
+ * `config_BARK_SERVER` 是库里的一行，这个 Worker 又持有 service_role key，
+ * 所以它决定了带着评论内容（含邮箱、IP）的请求会发到哪台机器上。不校验的话，
+ * 任何能写到 config 表的人都能把通知整体改道，甚至指向内网地址去探测。
+ * 这里要求必须是 https 的公网主机名。
+ */
+function assertSafeBarkBase(baseUrl: string): URL {
+	let parsed: URL;
+	try {
+		parsed = new URL(baseUrl);
+	} catch {
+		throw new Error('config_BARK_SERVER 不是合法 URL');
+	}
+
+	if (parsed.protocol !== 'https:') {
+		throw new Error('config_BARK_SERVER 必须使用 https');
+	}
+
+	if (isPrivateHost(parsed.hostname)) {
+		throw new Error('config_BARK_SERVER 不能指向内网地址');
+	}
+
+	return parsed;
+}
+
+/** 粗粒度的内网/回环地址判断，够挡住把通知改道到元数据服务或局域网的写法。 */
+function isPrivateHost(hostname: string): boolean {
+	const host = hostname.toLowerCase().replace(/^\[|\]$/g, '');
+
+	if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.internal')) {
+		return true;
+	}
+
+	// IPv6 回环与唯一本地地址
+	if (host === '::1' || host.startsWith('fc') || host.startsWith('fd') || host.startsWith('fe80')) {
+		return true;
+	}
+
+	const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+	if (!ipv4) {
+		return false;
+	}
+
+	const a = Number(ipv4[1]);
+	const b = Number(ipv4[2]);
+	return (
+		a === 0 ||
+		a === 10 ||
+		a === 127 ||
+		(a === 169 && b === 254) || // link-local，云厂商元数据服务就在这里
+		(a === 172 && b >= 16 && b <= 31) ||
+		(a === 192 && b === 168)
+	);
+}
+
 /** Bark 的推送格式是把 标题/副标题/正文 依次拼进 URL 路径。 */
 function buildBarkUrl(baseUrl: string, segments: NotificationSegments): string {
-	const base = baseUrl.replace(/\/+$/, '');
+	const base = assertSafeBarkBase(baseUrl).toString().replace(/\/+$/, '');
 	const parts = [segments.title, segments.subtitle, segments.body]
 		.filter((part): part is string => typeof part === 'string' && part.trim().length > 0)
 		.map((part) => encodeURIComponent(part.trim()));

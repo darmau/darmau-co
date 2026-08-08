@@ -1,3 +1,9 @@
+# SSR 响应的安全头在 src/hooks.server.ts 里设置——_headers 只作用于静态资源。
+# 这里补上静态资源自己的那份，避免直接访问 /_app/... 时缺头。
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
 /favicon.ico
   Cache-Control: public, max-age=3600, s-maxage=3600
 /_app/immutable/*

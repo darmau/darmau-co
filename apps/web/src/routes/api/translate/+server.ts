@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { checkRateLimit } from '$lib/server/rateLimit';
 import type { RequestHandler } from './$types';
 
 type TranslationResponse = {
@@ -13,13 +14,25 @@ const jsonResponse = (body: TranslationResponse, status?: number) => json(body, 
 // 原来是 React Router 的 resource route action，方法判断写在函数体里；
 // SvelteKit 按方法分发，非 POST 会自动 405，所以那段判断删掉了。
 // ThoughtCard 用裸 fetch 提交 FormData 并读 JSON，请求/响应形状必须保持不变。
+/** 单次翻译的输入上限。想法本来就短，超过这个长度只可能是拿来刷额度的。 */
+const MAX_TEXT_LENGTH = 5000;
+
 export const POST: RequestHandler = async ({ request, platform }) => {
+	// 这是个无需登录就能调用的 Workers AI 端点，先过限流再干活
+	if (!(await checkRateLimit(platform, 'RL_TRANSLATE', request))) {
+		return jsonResponse({ error: 'Too many requests' }, 429);
+	}
+
 	const formData = await request.formData();
 	const text = formData.get('text');
 	const targetLang = formData.get('targetLang');
 
 	if (typeof text !== 'string' || text.trim().length === 0) {
 		return jsonResponse({ error: 'Text is required' }, 400);
+	}
+
+	if (text.length > MAX_TEXT_LENGTH) {
+		return jsonResponse({ error: 'Text is too long' }, 413);
 	}
 
 	if (typeof targetLang !== 'string' || !SUPPORTED_TARGET_LANGS.has(targetLang)) {

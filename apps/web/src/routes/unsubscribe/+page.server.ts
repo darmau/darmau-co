@@ -3,7 +3,8 @@ import type { Actions, PageServerLoad } from './$types';
 
 type UnsubscribeLoaderData = {
 	valid: boolean;
-	commentId: number | null;
+	/** 回传给表单的是签名令牌本身，不是 commentId——见下方 action 的说明 */
+	token: string | null;
 	error?: string;
 };
 
@@ -22,7 +23,7 @@ export const load: PageServerLoad = async ({ url, platform }) => {
 	if (!token) {
 		return loaderData({
 			valid: false,
-			commentId: null,
+			token: null,
 			error: '缺少取消订阅令牌'
 		});
 	}
@@ -37,7 +38,7 @@ export const load: PageServerLoad = async ({ url, platform }) => {
 	if (!commentId) {
 		return loaderData({
 			valid: false,
-			commentId: null,
+			token: null,
 			error: '令牌无效或已过期'
 		});
 	}
@@ -46,19 +47,42 @@ export const load: PageServerLoad = async ({ url, platform }) => {
 	// 待审核评论对 anon 也不可见，查了会把合法链接误判成“评论不存在”。
 	return loaderData({
 		valid: true,
-		commentId
+		token
 	});
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
+	default: async ({ request, locals, platform }) => {
 		const formData = await request.formData();
-		const commentId = formData.get('commentId');
+		const token = formData.get('token');
 
-		if (!commentId || typeof commentId !== 'string') {
+		// 这里必须重新验签，不能直接收表单里的 commentId：
+		// 取消订阅链接是匿名可访问的，信任表单值等于任何人都能改任意评论的
+		// receive_notification（IDOR）。commentId 只能从签名令牌里解出来。
+		// 行为与 /[lang]/unsubscribe 保持一致。
+		if (!token || typeof token !== 'string') {
 			return actionData({
 				success: false,
-				error: '缺少评论 ID'
+				error: '缺少取消订阅令牌'
+			});
+		}
+
+		const secret = platform?.env?.UNSUBSCRIBE_KEY;
+
+		if (!secret) {
+			console.error('UNSUBSCRIBE_KEY is not configured');
+			return actionData({
+				success: false,
+				error: '取消订阅失败，请稍后重试'
+			});
+		}
+
+		const commentId = await verifyUnsubscribeToken(token, secret);
+
+		if (!commentId) {
+			return actionData({
+				success: false,
+				error: '令牌无效或已过期'
 			});
 		}
 
@@ -67,10 +91,13 @@ export const actions: Actions = {
 		const { error, count } = await locals.supabase
 			.from('comment')
 			.update({ receive_notification: false }, { count: 'exact' })
-			.eq('id', parseInt(commentId, 10));
+			.eq('id', commentId);
 
 		if (error || !count) {
-			console.error('Failed to unsubscribe:', error ?? `0 rows affected for comment ${commentId}`);
+			console.error(
+				'Failed to unsubscribe:',
+				error ?? `0 rows affected (RLS?) for comment ${commentId}`
+			);
 			return actionData({
 				success: false,
 				error: '取消订阅失败，请稍后重试'

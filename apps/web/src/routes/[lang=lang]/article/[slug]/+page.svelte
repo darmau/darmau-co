@@ -233,8 +233,9 @@
 
 	const label = $derived(getLanguageLabel(ArticleText, lang));
 	const pathname = $derived(pageState.url.pathname);
-	const isPremiumArticle = $derived(article.is_premium === true);
-	const canViewContent = $derived(!isPremiumArticle || !!session);
+	// 权限判定以服务端为准：无权限时 load 根本不会下发 content_json，
+	// 这里再算一遍只会得到同一个结论，却容易让人误以为拦截发生在浏览器侧。
+	const canViewContent = $derived(data.canViewContent);
 	const plainArticleHtml = $derived(
 		renderPlainArticleHtml(article.content_json as Json | null | undefined)
 	);

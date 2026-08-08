@@ -1,12 +1,12 @@
 import { error, type RequestHandler } from '@sveltejs/kit';
-import { createGatewayOpenAI, loadAiConfigMap } from '$lib/server/ai';
+import { createGatewayOpenAI, loadAiConfigMap, requireTextInput } from '$lib/server/ai';
+import { requireAdmin } from '$lib/server/auth';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	const { content } = await request.json();
+	await requireAdmin(locals);
 
-	if (!content || typeof content !== 'string') {
-		error(400, 'Content is required');
-	}
+	const body = await request.json();
+	const content = requireTextInput(body?.content, 'Content');
 
 	const configMap = await loadAiConfigMap(locals.supabase, ['prompt_SEO', 'model_ABSTRACT']);
 	const prompt = configMap.get('prompt_SEO');

@@ -1,4 +1,5 @@
 import { redirect } from '@sveltejs/kit';
+import { safeRedirect } from '$lib/utils/safeUrl';
 import type { RequestHandler } from './$types';
 
 const SUPPORTED_LANGS = ['zh', 'en', 'jp'] as const;
@@ -21,7 +22,9 @@ function deriveLangFromPath(path: string): SupportedLang {
  */
 export const GET: RequestHandler = async ({ url, locals }) => {
 	const code = url.searchParams.get('code');
-	const next = url.searchParams.get('next') ?? '/';
+	// next 直接来自查询串，不校验就是开放重定向：`?next=//evil.com` 会被浏览器
+	// 当成协议相对 URL 跳去外站，把 OAuth 回调变成钓鱼跳板。
+	const next = safeRedirect(url.searchParams.get('next'), '/');
 	const errorDescription = url.searchParams.get('error_description') ?? undefined;
 
 	if (code) {

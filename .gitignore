@@ -50,3 +50,6 @@ pnpm-debug.log*
 # agent tooling
 .claude/settings.local.json
 /supabase/
+
+# 安全审计报告：里面记录了尚未处理的弱点，仓库是公开的，不入库
+SECURITY_AUDIT.md

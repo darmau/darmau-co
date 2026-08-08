@@ -118,7 +118,55 @@ const supabase: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle: Handle = sequence(language, supabase);
+/**
+ * 安全响应头。
+ *
+ * 必须在这里加而不是只写 `_headers`：`_headers` 只作用于静态资源，
+ * SSR 出来的 HTML 是 Worker 生成的，不受它管——而需要保护的恰恰是 HTML。
+ *
+ * 关于 CSP 的 script-src：本站有两处运行时注入的脚本——Cloudflare Zaraz 在边缘
+ * 往 HTML 里插内联片段，Turnstile 挂 challenges.cloudflare.com——它们的哈希在
+ * 构建期拿不到。所以这里只上「加了不会误伤、但能真正堵住利用链」的指令：
+ *   - object-src/base-uri  堵住 <base> 劫持和插件类对象
+ *   - form-action          限制表单只能提交回本站
+ *   - frame-ancestors      防点击劫持
+ * script-src 需要先在预发环境用 Report-Only 跑一轮，确认 Zaraz 和站内嵌入
+ * （文章里的 iframe 是管理员录入的任意 HTML）都不受影响后再收紧。
+ */
+const SECURITY_HEADERS: Record<string, string> = {
+	// 刻意不设 default-src：它是所有未声明指令的兜底，一旦设成 'self'
+	// 就会连带掐掉 Mapbox 瓦片、img.darmau.co 图床、Supabase 请求和 Turnstile。
+	'Content-Security-Policy': [
+		"object-src 'none'",
+		"base-uri 'self'",
+		"form-action 'self'",
+		"frame-ancestors 'none'"
+	].join('; '),
+	// 阻止浏览器把响应嗅探成别的类型（比如把上传的文本当 HTML 执行）
+	'X-Content-Type-Options': 'nosniff',
+	// 跳到外站时不带完整路径，避免文章地址泄漏进第三方 referer 日志
+	'Referrer-Policy': 'strict-origin-when-cross-origin',
+	// 老浏览器的点击劫持防护，和上面的 frame-ancestors 对应
+	'X-Frame-Options': 'DENY',
+	'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()'
+};
+
+const securityHeaders: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
+
+	for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+		response.headers.set(name, value);
+	}
+
+	// HSTS 只在 https 下发，否则本地 http 调试会被浏览器强制升级
+	if (event.url.protocol === 'https:') {
+		response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	}
+
+	return response;
+};
+
+export const handle: Handle = sequence(securityHeaders, language, supabase);
 
 /**
  * 未捕获异常兜底。返回的 message 会成为 +error.svelte 里的 page.error.message，

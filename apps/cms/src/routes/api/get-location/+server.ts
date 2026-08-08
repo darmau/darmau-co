@@ -1,7 +1,10 @@
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { resolveLocationWithSupabase, type LocationPayload } from '$lib/server/location';
+import { requireAdmin } from '$lib/server/auth';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
+	await requireAdmin(locals);
+
 	const payload = await safeReadPayload(request);
 
 	if (!payload) {

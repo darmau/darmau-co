@@ -3,6 +3,7 @@ import type { EmailOtpType } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@darmau/database';
 import ConfirmText from '$lib/locales/confirm';
+import { safeExternalUrl, safeRedirect } from '$lib/utils/safeUrl';
 import type { Actions, PageServerLoad } from './$types';
 
 const SUPPORTED_LANGS = ['zh', 'en', 'jp'] as const;
@@ -78,13 +79,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const redirectParam = url.searchParams.get('redirect');
 	const needsUsernameParam = url.searchParams.get('needs_username');
 	const emailParam = url.searchParams.get('email');
-	const nextQuery = url.searchParams.get('next') ?? '/zh';
+	// magic link 里的 next 会一路带到最终 redirect()，不校验就是开放重定向
+	const nextQuery = safeRedirect(url.searchParams.get('next'), '/zh');
 	const lang = deriveLang(nextQuery);
-
-	console.log('=== Confirm Loader ===');
-	console.log('Full URL:', url.toString());
-	console.log('redirect param:', redirectParam);
-	console.log('needs_username param:', needsUsernameParam);
 
 	const supabase = locals.supabase;
 
@@ -96,11 +93,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
 		// 确保有 session
 		if (!session?.user) {
-			console.log('No session found, redirecting to login');
 			redirect(303, `/${lang}/login?error=magic_link`);
 		}
-
-		console.log('Showing username form for existing session');
 
 		// 旧版在这里手工把 createClient 返回的 headers 拼进响应；SvelteKit 的 cookie
 		// 由 event.cookies 统一写出，再拼一次会重复设置，所以删掉。
@@ -122,25 +116,16 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		try {
 			const redirectUrl = new URL(redirectParam);
 
-			console.log('Redirect URL:', redirectUrl.toString());
-
 			// 提取 token（注意：参数名是 token 不是 token_hash）
 			const token = redirectUrl.searchParams.get('token');
 			const type = redirectUrl.searchParams.get('type') as EmailOtpType | null;
 			const code = redirectUrl.searchParams.get('code');
-
-			console.log('Extracted tokens:', {
-				token: token?.substring(0, 10) + '...',
-				type,
-				code: code?.substring(0, 10) + '...'
-			});
 
 			let verifyError = null;
 			let tokenFound = false;
 
 			// 验证 token
 			if (code) {
-				console.log('Using code to exchange for session');
 				tokenFound = true;
 				const { error } = await supabase.auth.exchangeCodeForSession(code);
 				verifyError = error;
@@ -148,7 +133,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 					console.error('Code exchange failed:', error);
 				}
 			} else if (token && type) {
-				console.log('Using token to verify OTP');
 				tokenFound = true;
 				// verifyOtp 的参数名是 token_hash
 				const { error } = await supabase.auth.verifyOtp({
@@ -171,7 +155,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 				destination = `/${lang}/login?error=magic_link`;
 			} else {
 				// 验证成功，获取用户信息
-				console.log('Token verified successfully, getting session');
 				const {
 					data: { session }
 				} = await supabase.auth.getSession();
@@ -180,13 +163,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 					console.error('No session after verification');
 					destination = `/${lang}/login?error=magic_link`;
 				} else {
-					console.log('Session found for user:', session.user.email);
 					const hasUsername = !!session.user.user_metadata?.name;
-					console.log('Has username:', hasUsername, session.user.user_metadata?.name);
 
 					if (hasUsername) {
 						// 如果已有用户名，同步到 public.users 并重定向
-						console.log('User has username, syncing and redirecting');
 						await syncUserToPublicTable(
 							supabase,
 							session.user.id,
@@ -197,7 +177,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 					} else {
 						// 新用户需要设置用户名，重定向到不含 token 的 clean URL
 						// 这样页面刷新时不会重复验证已失效的 token
-						console.log('New user needs username, redirecting to clean URL');
 						destination = `/auth/confirm?needs_username=true&email=${encodeURIComponent(
 							session.user.email || ''
 						)}&next=${encodeURIComponent(nextQuery)}`;
@@ -213,7 +192,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	}
 
 	// 没有 redirect 参数，返回错误
-	console.log('No redirect parameter found');
 	redirect(303, `/${lang}/login?error=magic_link`);
 };
 
@@ -222,7 +200,8 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const username = (formData.get('username') as string | null)?.trim();
 		const websiteInput = (formData.get('website') as string | null)?.trim();
-		const nextPath = (formData.get('next') as string | null) ?? '/zh';
+		// next 来自表单隐藏字段，同样只允许站内路径
+		const nextPath = safeRedirect(formData.get('next'), '/zh');
 		const lang = deriveLang(nextPath);
 
 		const supabase = locals.supabase;
@@ -240,15 +219,11 @@ export const actions: Actions = {
 		let website: string | null = null;
 
 		if (websiteInput) {
-			const normalizedWebsite =
-				websiteInput.startsWith('http://') || websiteInput.startsWith('https://')
-					? websiteInput
-					: `https://${websiteInput}`;
+			// 这个值最终会进评论区的 <a href>，必须限定协议：
+			// 只做 new URL() 解析挡不住 `javascript:` 一类伪协议。
+			website = safeExternalUrl(websiteInput);
 
-			try {
-				const parsedUrl = new URL(normalizedWebsite);
-				website = parsedUrl.toString();
-			} catch {
+			if (!website) {
 				return failWith(400, {
 					error: labels.website_invalid,
 					values: {

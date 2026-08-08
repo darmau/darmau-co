@@ -1,4 +1,8 @@
+import { checkRateLimit } from '$lib/server/rateLimit';
 import type { Actions, PageServerLoad } from './$types';
+
+/** AutoRAG 查询的输入上限，避免超长 query 直接打到模型上 */
+const MAX_QUERY_LENGTH = 500;
 
 export const load: PageServerLoad = async ({ platform }) => {
 	const availableLangs = ['zh', 'en', 'jp'];
@@ -13,12 +17,27 @@ export const actions: Actions = {
 	// 旧版是路由的默认 action（`<Form method="post">`），这里拆成具名 action
 	search: async ({ request, platform }) => {
 		try {
+			// 搜索不需要登录，单次 AutoRAG 调用开销又不小，先限流
+			if (!(await checkRateLimit(platform, 'RL_SEARCH', request))) {
+				return {
+					error: '请求过于频繁，请稍后再试。Too many requests.',
+					results: null
+				};
+			}
+
 			const formData = await request.formData();
 			const query = formData.get('query');
 
 			if (!query || typeof query !== 'string' || query.trim() === '') {
 				return {
 					error: 'Query is required',
+					results: null
+				};
+			}
+
+			if (query.length > MAX_QUERY_LENGTH) {
+				return {
+					error: 'Query is too long',
 					results: null
 				};
 			}
@@ -60,9 +79,11 @@ export const actions: Actions = {
 				results: response
 			};
 		} catch (err) {
+			// 原始 err.message 里可能带 AutoRAG / AI Gateway 的内部信息，
+			// 记进日志就行，回给公网访客的只能是通用文案。
 			console.error('Search error:', err);
 			return {
-				error: err instanceof Error ? err.message : 'An unknown error occurred',
+				error: '搜索暂时不可用，请稍后再试。Search is temporarily unavailable.',
 				results: null
 			};
 		}

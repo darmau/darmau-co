@@ -1,8 +1,18 @@
 import { error, type RequestHandler } from '@sveltejs/kit';
-import { createGatewayOpenAI, loadAiConfigMap } from '$lib/server/ai';
+import {
+	createGatewayOpenAI,
+	loadAiConfigMap,
+	MAX_AI_TITLE_CHARS,
+	requireTextInput
+} from '$lib/server/ai';
+import { requireAdmin } from '$lib/server/auth';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	const { title } = await request.json();
+	await requireAdmin(locals);
+
+	// 此前 title 完全没有类型校验就直接送进模型
+	const body = await request.json();
+	const title = requireTextInput(body?.title, 'Title', MAX_AI_TITLE_CHARS);
 
 	const configMap = await loadAiConfigMap(locals.supabase, ['prompt_SLUG', 'model_SLUG']);
 	const prompt = configMap.get('prompt_SLUG');

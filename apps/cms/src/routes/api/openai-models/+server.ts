@@ -1,6 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import OpenAI from 'openai';
 import type { ConfigRow } from '$lib/types/config';
+import { requireAdmin } from '$lib/server/auth';
 
 const FALLBACK_MODELS = ['gpt-5-nano', 'gpt-5', 'gpt-4.1-mini', 'gpt-4.1', 'o4-mini'];
 const EXCLUDED_MODELS = new Set([
@@ -13,6 +14,8 @@ const EXCLUDED_MODELS = new Set([
 const MODEL_PREFIX_WHITELIST = ['gpt', 'o', 'omni', 'text'];
 
 export const GET: RequestHandler = async ({ locals }) => {
+	await requireAdmin(locals);
+
 	const supabase = locals.supabase;
 	const { data, error: supabaseError } = await supabase
 		.from('config')

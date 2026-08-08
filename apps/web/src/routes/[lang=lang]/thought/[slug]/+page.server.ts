@@ -6,6 +6,8 @@ import {
 	generateBreadcrumbStructuredData,
 	generateThoughtStructuredData
 } from '$lib/utils/structuredData';
+import { checkRateLimit } from '$lib/server/rateLimit';
+import { safeExternalUrl } from '$lib/utils/safeUrl';
 import { parseTurnstileOutcome } from '$lib/utils/turnstile';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -159,9 +161,17 @@ export const actions: Actions = {
 	comment: async ({ request, locals, platform }) => {
 		const formData = await request.formData();
 		const supabase = locals.supabase;
-		const {
-			data: { session }
-		} = await supabase.auth.getSession();
+		// 必须用 safeGetSession()：getSession() 只解 cookie 不验签，伪造一个
+		// 结构合法的 cookie 就能让 session 为真，从而整段跳过下面的 Turnstile 校验。
+		const { session } = await locals.safeGetSession();
+		// 评论是公网写入口。匿名侧下面还有 Turnstile，这道限流对登录用户同样生效。
+		if (!(await checkRateLimit(platform, 'RL_COMMENT', request))) {
+			return {
+				success: false,
+				error: '评论过于频繁，请稍后再试。Too many comments, please slow down.',
+				comment: null
+			};
+		}
 		const { text: content_text, error: contentError } = validateCommentText(
 			formData.get('content_text')
 		);
@@ -204,7 +214,9 @@ export const actions: Actions = {
 
 			const name = formData.get('name') as string;
 			const email = formData.get('email') as string;
-			const website = formData.get('website') as string;
+			// 存进库的 website 会在评论区渲染成 <a href>，写入侧就限定协议，
+			// 免得已有数据把 XSS 防线全押在渲染侧那一处校验上。
+			const website = safeExternalUrl(formData.get('website'));
 
 			// 不要 .select() 回读：匿名评论会被 set_comment_is_public 置为
 			// is_public = false，RLS 随即把它过滤掉，回读只会拿到 0 行报错。
@@ -221,9 +233,12 @@ export const actions: Actions = {
 			});
 
 			if (insertError) {
+				// Postgres 的原始报错会暴露表名、约束名和 RLS 策略细节，
+				// 匿名评论是公网入口，只回通用文案。
+				console.error('Anonymous comment insert failed:', insertError);
 				return {
 					success: false,
-					error: insertError.message,
+					error: '提交失败，请稍后重试。Failed to submit, please try again.',
 					comment: null
 				};
 			}

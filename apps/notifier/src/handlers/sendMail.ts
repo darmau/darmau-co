@@ -70,7 +70,9 @@ export async function handleSendMail(request: Request, env: Env): Promise<Respon
 		.single();
 
 	if (replyToError) {
-		return fail('Reply-to comment query failed', 500, replyToError.message);
+		// Postgres 的原始报错会暴露表结构和 RLS 细节，只记日志
+		console.error('Reply-to comment query failed:', replyToError);
+		return fail('Reply-to comment query failed', 500);
 	}
 	if (!replyToComment) return fail('Reply-to comment not found', 404);
 
@@ -91,7 +93,10 @@ export async function handleSendMail(request: Request, env: Env): Promise<Respon
 		.eq('id', target.id)
 		.single();
 
-	if (targetError) return fail('Target content query failed', 500, targetError.message);
+	if (targetError) {
+		console.error('Target content query failed:', targetError);
+		return fail('Target content query failed', 500);
+	}
 	if (!targetContent) return fail('Target content not found', 404);
 
 	const content = targetContent as unknown as {

@@ -18,7 +18,9 @@ export default {
     go_to_login: "立即登录",
     no_account: "还没有账户？",
     go_to_signup: "立即注册",
-    user_not_found: "用户不存在，请先注册。"
+    user_not_found: "用户不存在，请先注册。",
+    rate_limited: "操作过于频繁，请稍后再试。",
+    send_failed: "发送失败，请稍后再试。"
   },
 
   en: {
@@ -40,7 +42,9 @@ export default {
     go_to_login: "Sign In",
     no_account: "Don't have an account?",
     go_to_signup: "Sign Up",
-    user_not_found: "User not found. Please sign up first."
+    user_not_found: "User not found. Please sign up first.",
+    rate_limited: "Too many attempts. Please try again later.",
+    send_failed: "Could not send the link. Please try again later."
   },
 
   jp: {
@@ -62,6 +66,8 @@ export default {
     go_to_login: "ログイン",
     no_account: "アカウントをお持ちでないですか？",
     go_to_signup: "登録",
-    user_not_found: "ユーザーが見つかりません。先に登録してください。"
+    user_not_found: "ユーザーが見つかりません。先に登録してください。",
+    rate_limited: "リクエストが多すぎます。しばらくしてから再度お試しください。",
+    send_failed: "送信できませんでした。しばらくしてから再度お試しください。"
   },
 }

@@ -73,7 +73,7 @@
 			{/if}
 
 			<form method="POST" use:enhance={handleSubmit}>
-				<input type="hidden" name="commentId" value={data.commentId || ''} />
+				<input type="hidden" name="token" value={data.token ?? ''} />
 				<button
 					type="submit"
 					disabled={isSubmitting}

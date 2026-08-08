@@ -1,6 +1,8 @@
 import { error, fail } from '@sveltejs/kit';
 import { getClientIp } from '$lib/server/getClientIp';
 import { validateCommentText } from '$lib/utils/commentContent';
+import { checkRateLimit } from '$lib/server/rateLimit';
+import { safeExternalUrl } from '$lib/utils/safeUrl';
 import { parseTurnstileOutcome } from '$lib/utils/turnstile';
 import {
 	generateArticleStructuredData,
@@ -171,8 +173,15 @@ export const load: PageServerLoad = async ({ params, url, locals, platform }) =>
 	// 评论结构化数据
 	const commentStructuredData = buildCommentsStructuredData(comments, baseUrl, currentUrl);
 
+	// 付费墙必须在服务端生效。页面组件里那个 canViewContent 只控制显示与否，
+	// 正文照样躺在 SSR payload 和 /__data.json 里，登出用户查看源码就能读全文。
+	// 这里对无权限的请求直接不下发 content_json。
+	const { session } = await locals.safeGetSession();
+	const canViewContent = articleContent.is_premium !== true || !!session;
+
 	return {
-		article: articleContent,
+		article: canViewContent ? articleContent : { ...articleContent, content_json: null },
+		canViewContent,
 		previousArticle,
 		nextArticle,
 		domain: baseUrl,
@@ -197,6 +206,14 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const supabase = locals.supabase;
 		const { session } = await locals.safeGetSession();
+		// 评论是公网写入口。匿名侧下面还有 Turnstile，这道限流对登录用户同样生效。
+		if (!(await checkRateLimit(platform, 'RL_COMMENT', request))) {
+			return fail(429, {
+				success: false,
+				error: '评论过于频繁，请稍后再试。Too many comments, please slow down.',
+				comment: null
+			});
+		}
 		const { text: content_text, error: contentError } = validateCommentText(
 			formData.get('content_text')
 		);
@@ -239,7 +256,9 @@ export const actions: Actions = {
 
 			const name = formData.get('name') as string;
 			const email = formData.get('email') as string;
-			const website = formData.get('website') as string;
+			// 存进库的 website 会在评论区渲染成 <a href>，写入侧就限定协议，
+			// 免得已有数据把 XSS 防线全押在渲染侧那一处校验上。
+			const website = safeExternalUrl(formData.get('website'));
 
 			// 不要 .select() 回读：匿名评论会被 set_comment_is_public 置为
 			// is_public = false，RLS 随即把它过滤掉，回读只会拿到 0 行报错。
@@ -256,9 +275,12 @@ export const actions: Actions = {
 			});
 
 			if (insertError) {
+				// Postgres 的原始报错会暴露表名、约束名和 RLS 策略细节，
+				// 匿名评论是公网入口，只回通用文案。
+				console.error('Anonymous comment insert failed:', insertError);
 				return fail(500, {
 					success: false,
-					error: insertError.message,
+					error: '提交失败，请稍后重试。Failed to submit, please try again.',
 					comment: null
 				});
 			}

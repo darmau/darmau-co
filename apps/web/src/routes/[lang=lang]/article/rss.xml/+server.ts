@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import getLanguageLabel from "$lib/utils/getLanguageLabel";
 import HomepageText from '$lib/locales/homepage';
+import { normalizeCdata } from "$lib/utils/rss";
 import type {Json} from "@darmau/database";
 import type {FeedEnclosure, RichRssEntry} from "$lib/types/rss";
 
@@ -251,13 +252,13 @@ function generateRss({description, entries, link, title, language}: {
         </image>
         ${entries.map((entry) => `
           <item>
-          <title><![CDATA[${entry.title}]]></title>
-            <description><![CDATA[${entry.description}]]></description>
+          <title><![CDATA[${normalizeCdata(entry.title)}]]></title>
+            <description><![CDATA[${normalizeCdata(entry.description)}]]></description>
             <pubDate>${entry.pubDate}</pubDate>
             <link>${entry.link}</link>
             <guid isPermaLink="false">${entry.guid}</guid>
             <content:encoded>
-              <![CDATA[${entry.content}]]>
+              <![CDATA[${normalizeCdata(entry.content)}]]>
             </content:encoded>
             <author>李大毛</author>
             <category>${entry.category}</category>
@@ -288,6 +289,7 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
       abstract,
       published_at,
       content_json,
+      is_premium,
       category (title),
       cover (alt, size, storage_key),
       language!inner (lang)
@@ -306,7 +308,11 @@ export const GET: RequestHandler = async ({ params, locals, platform }) => {
     link: `https://darmau.co/${lang}`,
     entries: posts ? posts.map((post) => {
       const summary = post.abstract ?? post.subtitle ?? "";
-      const fullContent = renderRssArticleHtml(post.content_json as Json | null | undefined);
+      // 付费文章只发摘要。RSS 是完全匿名且可被缓存/转发的，
+      // 在这里发全文等于绕开付费墙——比 SSR 那条路径还彻底。
+      const fullContent = post.is_premium
+        ? ""
+        : renderRssArticleHtml(post.content_json as Json | null | undefined);
       const fallbackContent = summary ? `<p${getStyleAttr("p")}>${escapeHtml(summary)}</p>` : "";
       return {
         description: post.subtitle ?? summary,

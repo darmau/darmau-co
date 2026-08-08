@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
 import getLanguageLabel from "$lib/utils/getLanguageLabel";
 import HomepageText from '$lib/locales/homepage';
+import { normalizeCdata } from "$lib/utils/rss";
 import type {FeedEnclosure, RichRssEntry} from "$lib/types/rss";
 
 type RssEntry = RichRssEntry;
@@ -40,13 +41,13 @@ function generateRss({description, entries, link, title, language}: {
         </image>
         ${entries.map((entry) => `
           <item>
-          <title><![CDATA[${entry.title}]]></title>
-            <description><![CDATA[${entry.description}]]></description>
+          <title><![CDATA[${normalizeCdata(entry.title)}]]></title>
+            <description><![CDATA[${normalizeCdata(entry.description)}]]></description>
             <pubDate>${entry.pubDate}</pubDate>
             <link>${entry.link}</link>
             <guid isPermaLink="false">${entry.guid}</guid>
             <content:encoded>
-              <![CDATA[${entry.content}]]>
+              <![CDATA[${normalizeCdata(entry.content)}]]>
             </content:encoded>
             <author>李大毛</author>
             <category>${entry.category}</category>

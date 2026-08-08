@@ -1,5 +1,6 @@
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 import type { Database } from '@darmau/database';
+import type { RateLimiter } from '$lib/server/rateLimit';
 
 declare global {
 	namespace App {
@@ -17,6 +18,12 @@ declare global {
 			env: Env & {
 				/** 只在 notifier 侧必需，web 这边是可选的 */
 				RESEND_KEY?: string;
+				// wrangler.jsonc 的 unsafe.bindings 不会被 `wrangler types` 生成，
+				// 只能手写。dev 下没有 Workers 运行时，所以都是可选的。
+				RL_TRANSLATE?: RateLimiter;
+				RL_SEARCH?: RateLimiter;
+				RL_LOGIN?: RateLimiter;
+				RL_COMMENT?: RateLimiter;
 			};
 			cf?: CfProperties;
 			ctx: ExecutionContext;

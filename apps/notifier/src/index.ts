@@ -33,12 +33,10 @@ export default {
 		try {
 			return await handler(request, env);
 		} catch (error) {
+			// 只记日志，不把原始 message 回给调用方：异常里带的是 Postgres 报错、
+			// 外部服务地址、配置项名称，属于内部实现细节。
 			console.error(`${pathname} 处理失败:`, error);
-			return fail(
-				'Internal server error',
-				500,
-				error instanceof Error ? error.message : String(error)
-			);
+			return fail('Internal server error', 500);
 		}
 	}
 } satisfies ExportedHandler<Env>;

@@ -3,6 +3,7 @@ import HomepageText from "$lib/locales/homepage";
 import getLanguageLabel from "$lib/utils/getLanguageLabel";
 import getTime from "$lib/utils/getTime";
 import type { FeedEnclosure } from "$lib/types/rss";
+import { normalizeCdata } from "$lib/utils/rss";
 
 type RssEntry = {
   title: string;
@@ -25,13 +26,6 @@ function formatPubDate(date: string | null): string {
     return new Date().toUTCString();
   }
   return parsed.toUTCString();
-}
-
-function normalizeCdata(value?: string | null): string {
-  if (!value) {
-    return "";
-  }
-  return value.replace(/]]>/g, "]]]]><![CDATA[>");
 }
 
 function shouldRenderContent(content?: string | null): content is string {

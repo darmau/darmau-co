@@ -1,5 +1,6 @@
 import { error, type RequestHandler } from '@sveltejs/kit';
 import { createGatewayOpenAI, loadAiConfigMap } from '$lib/server/ai';
+import { requireAdmin } from '$lib/server/auth';
 
 type GenerateImageRequest = {
 	prompt?: unknown;
@@ -43,12 +44,21 @@ function parseDimensions(size: ImageSize) {
 	};
 }
 
+/** 出图提示词的长度上限，防止一次请求把超长文本推给计费接口 */
+const MAX_PROMPT_CHARS = 4000;
+
 export const POST: RequestHandler = async ({ request, locals }) => {
+	await requireAdmin(locals);
+
 	const body = (await request.json()) as GenerateImageRequest;
 	const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
 
 	if (!prompt) {
 		error(400, 'Prompt is required');
+	}
+
+	if (prompt.length > MAX_PROMPT_CHARS) {
+		error(413, `Prompt is too long (max ${MAX_PROMPT_CHARS} characters)`);
 	}
 
 	const size = parseSize(body.size);
@@ -135,13 +145,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 		);
 	} catch (err) {
+		// 供应商返回的原始 message 里可能带账号 / 配额 / 密钥前缀之类的信息，
+		// 记进日志即可，回给浏览器的只留通用文案。
 		console.error('OpenAI image generation failed', err);
-		const message =
-			err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
-				? err.message
-				: 'Image generation failed.';
 
-		return new Response(JSON.stringify({ error: message }), {
+		return new Response(JSON.stringify({ error: 'Image generation failed.' }), {
 			status: 502,
 			headers: { 'Content-Type': 'application/json' }
 		});

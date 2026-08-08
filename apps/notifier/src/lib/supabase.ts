@@ -13,6 +13,22 @@ export function createServiceClient(env: Env): Client {
 	});
 }
 
+/** 读一条可选配置，没有就返回 null（区别于 getConfigValue 的必填语义）。 */
+export async function getOptionalConfigValue(
+	client: Client,
+	key: string
+): Promise<string | null> {
+	const { data, error } = await client.from('config').select('value').eq('key', key).maybeSingle();
+
+	if (error) {
+		console.error(`查询可选配置 ${key} 失败:`, error.message);
+		return null;
+	}
+
+	const value = data?.value;
+	return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
 /** 从 config 表读一条配置，读不到就抛——调用方需要的都是必填项。 */
 export async function getConfigValue(client: Client, key: string): Promise<string> {
 	const { data, error } = await client.from('config').select('value').eq('key', key).maybeSingle();
