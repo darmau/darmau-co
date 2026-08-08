@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "shinano-remix",
-  "compatibility_date": "2025-11-07",
+  "name": "firewood-web",
+  "compatibility_date": "2026-06-16",
   "pages_build_output_dir": "./build/client",
   "ai": {
     "binding": "AI",
@@ -9,14 +9,14 @@
   },
   "env": {
     "preview": {
-      "name": "shinano-remix-preview",
+      "name": "firewood-web-preview",
       "ai": {
         "binding": "AI",
         "remote": true
       }
     },
     "production": {
-      "name": "shinano-remix",
+      "name": "firewood-web",
       "ai": {
         "binding": "AI",
         "remote": true

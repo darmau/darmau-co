@@ -1,8 +1,8 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "shinano-notifier",
+  "name": "firewood-notify",
   "main": "src/index.ts",
-  "compatibility_date": "2025-11-07",
+  "compatibility_date": "2026-06-16",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
   "observability": {
@@ -10,7 +10,7 @@
   },
   "vars": {
     // 发件地址所属域名必须已经 onboard 到 Cloudflare Email Service
-    "MAIL_FROM": "noreply@auth.darmau.co",
+    "MAIL_FROM": "noreply@darmau.co",
     "SITE_URL": "https://darmau.co"
   },
   "send_email": [

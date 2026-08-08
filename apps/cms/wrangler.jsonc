@@ -1,8 +1,8 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "shinano-cms-worker",
+	"name": "firewood-cms",
 	"main": ".svelte-kit/cloudflare/_worker.js",
-	"compatibility_date": "2025-11-07",
+	"compatibility_date": "2026-06-16",
 	"workers_dev": false,
 	"assets": {
 		"binding": "ASSETS",
@@ -22,7 +22,7 @@
 	},
 	"env": {
 		"development": {
-			"name": "shinano-cms-worker",
+			"name": "firewood-cms",
 			"assets": {
 				"binding": "ASSETS",
 				"directory": ".svelte-kit/cloudflare"
