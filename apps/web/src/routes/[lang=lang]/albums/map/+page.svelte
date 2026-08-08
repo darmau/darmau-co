@@ -49,7 +49,7 @@
 
 <Subnav active="photography" />
 <div class="w-full max-w-8xl mx-auto p-4 md:py-8">
-	<h1 class="sr-only">Albums Map</h1>
+	<h1 class="sr-only">{label.map_title}</h1>
 	<MapGallery
 		mapboxToken={data.MAPBOX}
 		imageCollection={data.imageCollection}

@@ -9,6 +9,7 @@
 	import { getSiteContext } from '$lib/context';
 	import BookText from '$locales/books';
 	import ThoughtText from '$locales/thought';
+	import UIText from '$locales/ui';
 	import getDate from '$utils/getDate';
 	import getLanguageLabel from '$utils/getLanguageLabel';
 	import { trackLoadMore } from '$utils/zaraz';
@@ -21,6 +22,7 @@
 	const bookLabel = $derived(getLanguageLabel(BookText, site.lang));
 	// 没有专属文案，套用thought里的
 	const label = $derived(getLanguageLabel(ThoughtText, site.lang));
+	const uiLabel = $derived(getLanguageLabel(UIText, site.lang));
 
 	// 对应原来的 useState(loaderData.books)：只取首次快照，后续靠「加载更多」追加
 	let books = $state<BookRecord[]>(untrack(() => data.books));
@@ -59,7 +61,8 @@
 <I18nHead baseUrl={data.baseUrl} lang={site.lang} availableLangs={data.availableLangs} path="book" />
 
 <Subnav active="others" />
-<h1 class="sr-only">Books</h1>
+<!-- 原来硬编码英文「Books」，中日文用户的读屏会用本地语音引擎念英文 -->
+<h1 class="sr-only">{bookLabel.title}</h1>
 <div class="w-full max-w-6xl mx-auto p-4 md:py-8 my-8 lg:my-12">
 	<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
 		{#each books as book (book.id)}
@@ -72,15 +75,25 @@
 					/>
 				{/if}
 				<div class="w-full space-y-2 lg:space-y-3">
-					<h3 class="font-medium text-lg text-zinc-800">{book.title}</h3>
+					<!-- 页面 h1 是 sr-only 的书单标题，这里原来是 h3，中间缺了 h2 -->
+					<h2 class="font-medium text-lg text-zinc-800">{book.title}</h2>
 					<RateStars n={book.rate} />
 					{#if book.comment}
 						<p class="text-zinc-700">{book.comment}</p>
 					{/if}
 					<div class="text-sm text-zinc-500">{getDate(book.date!, site.lang)}</div>
 					{#if book.link}
-						<a href={book.link} target="_blank" class="block my-2" rel="noreferrer">
+						<!-- 原来链接里只有一个 aria-hidden 的图标，可访问名为空，读屏只报「链接」 -->
+						<a
+							href={book.link}
+							target="_blank"
+							class="block my-2 w-fit focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+							rel="noopener noreferrer"
+						>
 							<LinkIcon class="w-4 h-4 text-zinc-500 hover:text-violet-700 cursor-pointer" />
+							<span class="sr-only">
+								{bookLabel.view_detail}{book.title}{uiLabel.opens_in_new_window}
+							</span>
 						</a>
 					{/if}
 				</div>

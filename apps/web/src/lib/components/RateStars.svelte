@@ -12,11 +12,13 @@
 </script>
 
 {#snippet outlineStar()}
-	<Star class="w-4 h-4 text-gray-500" />
+	<Star class="w-4 h-4 text-zinc-500" />
 {/snippet}
 
+<!-- 单颗星的 svg 自带 aria-hidden，整组靠 role="img" + aria-label 报出「几分（满分 5）」。
+     评分是纯数字，不随语言变化，所以不走文案表 -->
 {#if n === null}
-	<div>
+	<div class="flex gap-1" role="img" aria-label="—/5">
 		{@render outlineStar()}
 		{@render outlineStar()}
 		{@render outlineStar()}
@@ -24,7 +26,7 @@
 		{@render outlineStar()}
 	</div>
 {:else}
-	<div class="flex gap-1">
+	<div class="flex gap-1" role="img" aria-label="{n}/5">
 		{#each solid as i (i)}
 			<StarSolid class="w-4 h-4 text-yellow-500" />
 		{/each}

@@ -41,19 +41,27 @@
 	const loginPath = $derived(`/${lang}/login`);
 </script>
 
+<!-- 这个页面原来完全没有 <svelte:head>，标签页只会显示 URL；
+	 而且是登录失败的中转页，不该进搜索索引 -->
+<svelte:head>
+	<title>{labels.error_title}</title>
+	<meta name="robots" content="noindex" />
+</svelte:head>
+
 <div class="min-h-screen bg-zinc-50 flex flex-col justify-center px-4 py-16">
 	<div class="mx-auto w-full max-w-md bg-white p-10 shadow sm:rounded-lg">
-		<h1 class="text-2xl font-semibold text-zinc-900 text-center">{labels.title}</h1>
+		<h1 class="text-2xl font-semibold text-zinc-900 text-center">{labels.error_title}</h1>
 		<p class="mt-4 text-sm text-zinc-600 text-center">{labels.invalid}</p>
 		{#if reason !== 'unknown'}
-			<p class="mt-2 text-xs text-zinc-400 text-center break-words">
+			<!-- zinc-400 对比度不足 4.5:1，提到 zinc-500 -->
+			<p class="mt-2 text-xs text-zinc-500 text-center break-words">
 				{reason}
 			</p>
 		{/if}
 		<div class="mt-8 space-y-3">
 			<a
 				href={loginPath}
-				class="block w-full text-center rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+				class="block w-full text-center rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 			>
 				{labels.back_to_login}
 			</a>

@@ -24,6 +24,7 @@
 	import EXIF, { type EXIFProps } from '$components/EXIF.svelte';
 	import { getSiteContext } from '$lib/context';
 	import { trackViewFullscreen } from '$lib/utils/zaraz';
+	import { modal } from '$lib/actions/modal';
 
 	// 原实现用的是 yet-another-react-lightbox（Inline + Thumbnails + Captions 三个插件）。
 	// 那个库没有 Svelte 版本，这里按原来的交互手写：内联轮播 + 缩略图条 + 全屏浮层。
@@ -64,18 +65,29 @@
 		if (albumTitle) trackViewFullscreen(albumTitle);
 	}
 
+	let carousel = $state<HTMLElement | null>(null);
+
+	// 只在全屏时、或焦点落在轮播内部时才用方向键切图，否则会抢走整页的方向键滚动。
+	// 全屏浮层里的 Escape 由 modal action 负责。
 	function onKeydown(event: KeyboardEvent) {
+		const active = document.activeElement;
+		if (!fullscreen && !(carousel && active && carousel.contains(active))) return;
 		if (event.key === 'ArrowLeft') go(index - 1);
 		else if (event.key === 'ArrowRight') go(index + 1);
-		else if (event.key === 'Escape') fullscreen = false;
+		else return;
+		event.preventDefault();
 	}
+
+	// 缩略图按钮的可访问名：有 alt 就用 alt，避免 aria-label 把图片描述整个盖掉
+	const thumbLabel = (photo: AlbumPhoto, i: number) =>
+		photo.image.alt ? `${photo.image.alt} (${i + 1}/${albumImages.length})` : `${i + 1}`;
 </script>
 
-<svelte:window onkeydown={fullscreen ? onKeydown : undefined} />
+<svelte:window onkeydown={onKeydown} />
 
-<div>
+<div bind:this={carousel}>
 	<div class="relative group">
-		<div class="relative w-full max-w-[1280px] aspect-5/4 overflow-hidden">
+		<div class="relative w-full max-w-7xl aspect-5/4 overflow-hidden">
 			{#if current}
 				<img
 					src={src(current, 1280)}
@@ -130,7 +142,7 @@
 				<button
 					type="button"
 					onclick={() => go(i)}
-					aria-label="Photo {i + 1}"
+					aria-label={thumbLabel(photo, i)}
 					aria-current={i === index}
 					class="shrink-0 w-24 h-20 overflow-hidden border-3 {i === index
 						? 'border-zinc-600'
@@ -149,7 +161,14 @@
 </div>
 
 {#if fullscreen}
-	<div class="fixed inset-0 z-100 bg-black/95 flex flex-col">
+	<div
+		role="dialog"
+		aria-modal="true"
+		aria-label={albumTitle ?? current?.image.alt ?? ''}
+		tabindex="-1"
+		use:modal={() => (fullscreen = false)}
+		class="fixed inset-0 z-100 bg-black/95 flex flex-col"
+	>
 		<button
 			type="button"
 			aria-label="Close"

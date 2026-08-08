@@ -207,6 +207,7 @@
 	import CommentEditor from '$components/CommentEditor.svelte';
 	import ContentContainer from '$components/ContentContainer.svelte';
 	import I18nHead from '$components/I18nHead.svelte';
+	import PageContainer from '$components/PageContainer.svelte';
 	import NextAndPrev, { type NeighboringPost } from '$components/NextAndPrev.svelte';
 	import Reaction, { type ReactionSummary } from '$components/Reaction.svelte';
 	import ReadingProcess from '$components/ReadingProcess.svelte';
@@ -321,20 +322,21 @@
 	path="article/{article.slug}"
 />
 
-<div class="w-full max-w-6xl mx-auto p-4 md:py-8 mb-8 lg:mb-16">
+<PageContainer>
 	<ReadingProcess />
 	<Breadcrumb pages={breadcrumbPages} />
 	<div class="flex flex-col gap-8 md:gap-16">
 		<div class="grid grid-cols-1 md:grid-cols-2 grid-rows-1 mt-4 gap-6 md:gap-8">
 			<header class="space-y-4">
 				<div class="flex gap-4 flex-wrap justify-start items-center">
-					<h3 class="text-sm text-violet-700 font-medium">{article.category!.title}</h3>
+					<!-- 分类和副标题都是装饰性的 eyebrow，原来用 h3/h2 会让标题顺序变成 h3 → h1 → h2 -->
+					<p class="text-sm text-violet-700 font-medium">{article.category!.title}</p>
 					<time class="text-zinc-600 text-sm">{getTime(article.published_at!, lang)}</time>
 				</div>
 				<div class="flex items-center gap-3 text-zinc-800">
 					<h1 class="font-medium leading-normal text-4xl lg:text-5xl">{article.title}</h1>
 				</div>
-				<h2 class="text-zinc-600 text-lg lg:text-xl">{article.subtitle}</h2>
+				<p class="text-zinc-600 text-lg lg:text-xl">{article.subtitle}</p>
 				{#if article.abstract}
 					<p class="p-4 rounded-md bg-zinc-100 text-zinc-600 leading-normal text-sm lg:text-base">
 						{article.abstract}
@@ -356,7 +358,7 @@
 				<ResponsiveImage
 					image={article.cover as unknown as Image}
 					width={960}
-					classList="w-full rounded-md overflow-hiden object-cover aspect-3/2"
+					classList="w-full rounded-md overflow-hidden object-cover aspect-3/2"
 				/>
 			{/if}
 		</div>
@@ -376,7 +378,7 @@
 					{:else}
 						<div class="relative overflow-hidden rounded-lg border border-violet-200 bg-white/80 p-4 md:p-6">
 							<div class="pointer-events-none select-none blur-sm" aria-hidden="true">
-								<div class="space-y-3 text-left text-lg font-semibold leading-8 text-gray-300">
+								<div class="space-y-3 text-left text-lg font-semibold leading-8 text-zinc-300">
 									<p>
 										我们认为下面这些真理是不证自明的：人人生而平等，造物主赋予他们若干不可剥夺的权利，其中包括生命权、自由权和追求幸福的权利。为了保障这些权利，人们才在他们之间建立政府，而政府之正当权力，则来自被统治者的同意。任何形式的政府，只要破坏上述目的，人民就有权利改变或废除它，并建立新政府；新政府赖以奠基的原则，得以组织权力的方式，都要最大可能地增进民众的安全和幸福。的确，从慎重考虑，不应当由于轻微和短暂的原因而改变成立多年的政府。过去的一切经验也都说明，任何苦难，只要尚能忍受，人类都宁愿容忍，而无意废除他们久已习惯了的政府来恢复自身的权益。但是，当政府一贯滥用职权、强取豪夺，一成不变地追逐这一目标，足以证明它旨在把人民置于绝对专制统治之下时，那么，人民就有权利，也有义务推翻这个政府，并为他们未来的安全建立新的保障。
 									</p>
@@ -389,7 +391,7 @@
 								<p class="text-base text-zinc-600 md:text-lg">{label.premium_content_locked}</p>
 								<a
 									href="/{lang}/login"
-									class="inline-flex items-center rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+									class="inline-flex items-center rounded-md bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 								>
 									{label.login_to_read}
 								</a>
@@ -419,13 +421,18 @@
 							{replyingTo}
 							onCancelReply={handleCancelReply}
 						/>
-						<div class="flex flex-col gap-4 divide-y divide-none">
+						<!-- live region 要常驻 DOM 才会被读屏播报，所以容器无条件渲染 -->
+						<div role="alert" class="empty:hidden">
 							{#if form?.error}
-								<p class="mt-2 text-sm text-red-500">{form.error}</p>
+								<p class="mt-2 text-sm text-red-600">{form.error}</p>
 							{/if}
+						</div>
+						<div role="status" class="empty:hidden">
 							{#if form?.success}
-								<p class="mt-2 text-sm text-green-500">{form.success}</p>
+								<p class="mt-2 text-sm text-green-700">{form.success}</p>
 							{/if}
+						</div>
+						<div class="flex flex-col gap-4 divide-y divide-none">
 							{#each data.comments as comment (comment.id)}
 								<CommentBlock comment={comment as unknown as CommentProps} onReply={handleReply} />
 							{/each}
@@ -434,13 +441,13 @@
 							{#if data.page > 1}
 								<a
 									href="?page={data.page - 1}&limit={data.limit}#comment-editor"
-									class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+									class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 								>{label.previous}</a>
 							{/if}
 							{#if data.page < data.totalPage}
 								<a
 									href="?page={data.page + 1}&limit={data.limit}#comment-editor"
-									class="ml-auto rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+									class="ml-auto rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 								>{label.next}</a>
 							{/if}
 						</div>
@@ -459,4 +466,4 @@
 			{/if}
 		</div>
 	</div>
-</div>
+</PageContainer>

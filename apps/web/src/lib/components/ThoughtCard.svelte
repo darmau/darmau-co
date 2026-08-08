@@ -30,6 +30,7 @@
 	import ResponsiveImage from '$components/ResponsiveImage.svelte';
 	import getTime from '$utils/getTime';
 	import { getSiteContext } from '$lib/context';
+	import UIText from '$lib/locales/ui';
 	import getLanguageLabel from '$utils/getLanguageLabel';
 	import ThoughtText from '$locales/thought';
 	import { trackTranslate } from '$utils/zaraz';
@@ -42,6 +43,7 @@
 
 	const site = getSiteContext();
 	const label = $derived(getLanguageLabel(ThoughtText, site.lang));
+	const uiLabel = $derived(getLanguageLabel(UIText, site.lang));
 
 	// 原版用 useFetcher 往 /api/translate 提交；SvelteKit 这边直接 fetch 那个资源路由。
 	let translatedText = $state<string | null>(null);
@@ -98,9 +100,11 @@
 </script>
 
 <div class="break-inside-avoid mb-4">
-	<a
-		href="/{site.lang}/thought/{thought.slug}"
-		class="block cursor-pointer relative rounded-2xl bg-white px-6 py-2 shadow-xl border border-gray-200 overflow-hidden shadow-zinc-500/10 hover:shadow-zinc-500/30 hover:shadow-2xl transition-all duration-300"
+	<!-- 整张卡片原本包在一个 <a> 里，而想法正文自己会渲染出链接：
+	     嵌套 <a> 是无效 HTML，而且这个链接的可访问名是整篇正文。
+	     改成 stretched link：只有时间戳是真链接，用 ::after 铺满卡片接管点击。 -->
+	<div
+		class="thought-card cursor-pointer relative rounded-2xl bg-white px-6 py-2 shadow-xl border border-zinc-200 overflow-hidden shadow-zinc-500/10 hover:shadow-zinc-500/30 hover:shadow-2xl transition-all duration-300 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-violet-600"
 	>
 		<svg aria-hidden="true" width="105" height="78" class="absolute left-6 top-6 fill-slate-100">
 			<path
@@ -111,14 +115,22 @@
 			<ContentContainer content={thought.content_json} />
 			<div class="flex gap-3 justify-start items-center">
 				<div class="flex gap-1 items-center">
-					<EyeSolid class="h-4 w-4 inline-block text-zinc-400" />
+					<EyeSolid class="h-4 w-4 inline-block text-zinc-500" />
 					<span class="text-zinc-500 text-sm">{thought.page_view}</span>
 				</div>
 				<div class="flex gap-1 items-center">
-					<ChatBubbleOvalLeft class="h-4 w-4 inline-block text-zinc-400" />
+					<ChatBubbleOvalLeft class="h-4 w-4 inline-block text-zinc-500" />
 					<span class="text-zinc-500 text-sm">{thought.comments[0].count}</span>
 				</div>
-				<p class="text-sm text-zinc-500">{getTime(thought.created_at, site.lang)}</p>
+				<a
+					href="/{site.lang}/thought/{thought.slug}"
+					class="stretched-link text-sm text-zinc-500 hover:text-violet-700 after:absolute after:inset-0 after:content-['']"
+				>
+					<span class="sr-only">{uiLabel.read_more}: </span>{getTime(
+						thought.created_at,
+						site.lang
+					)}
+				</a>
 			</div>
 			{#if thought.thought_image && thought.thought_image.length > 0}
 				<div class="grid grid-cols-3 gap-4">
@@ -132,7 +144,7 @@
 				</div>
 			{/if}
 		</div>
-	</a>
+	</div>
 
 	{#if canTranslate}
 		<div class="mt-3 space-y-2">
@@ -145,17 +157,29 @@
 				{buttonLabel}
 			</button>
 
-			{#if errorMessage}
-				<p class="text-sm text-red-500">{errorMessage || label.translation_error}</p>
-			{/if}
+			<!-- 翻译结果和错误都是点击后异步插进来的，容器常驻 DOM 并声明 live region，
+				 读屏软件才会播报；按钮留在容器外，免得按钮文案变化也被反复播报 -->
+			<div class="space-y-2" role="status" aria-live="polite">
+				{#if errorMessage}
+					<p class="text-sm text-red-600">{errorMessage}</p>
+				{/if}
 
-			{#if showTranslation && translatedText}
-				<div
-					class="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-zinc-700 whitespace-pre-line"
-				>
-					{translatedText}
-				</div>
-			{/if}
+				{#if showTranslation && translatedText}
+					<div
+						class="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-zinc-700 whitespace-pre-line"
+					>
+						{translatedText}
+					</div>
+				{/if}
+			</div>
 		</div>
 	{/if}
 </div>
+
+<style>
+	/* stretched link 的 ::after 铺满整张卡片，正文里的链接要浮上来才点得到 */
+	.thought-card :global(a:not(.stretched-link)) {
+		position: relative;
+		z-index: 1;
+	}
+</style>

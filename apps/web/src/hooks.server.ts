@@ -1,5 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
-import { redirect, type Handle } from '@sveltejs/kit';
+import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import type { Session, User } from '@supabase/supabase-js';
 import type { Database } from '@darmau/database';
@@ -119,3 +119,15 @@ const supabase: Handle = async ({ event, resolve }) => {
 };
 
 export const handle: Handle = sequence(language, supabase);
+
+/**
+ * 未捕获异常兜底。返回的 message 会成为 +error.svelte 里的 page.error.message，
+ * 而那个页面刻意不展示它——内部消息是给日志看的，访客只该看到本地化的通用文案。
+ */
+export const handleError: HandleServerError = ({ error, status, message }) => {
+	// 404 是正常流量（爬虫、旧链接），不值得记
+	if (status !== 404) {
+		console.error('[unhandled]', error);
+	}
+	return { message };
+};

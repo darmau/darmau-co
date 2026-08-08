@@ -67,7 +67,8 @@
 />
 
 <Subnav active="others" />
-<h1 class="sr-only">Thought Detail</h1>
+<!-- 这是列表页，原来的 h1 写成了「Thought Detail」（和详情页对调了），而且硬编码英文 -->
+<h1 class="sr-only">{label.all_thoughts}</h1>
 <div class="w-full flex-1 min-h-full max-w-2xl mx-auto p-4 md:py-8 lg:mb-16">
 	<div class="flex flex-col gap-4">
 		{#each thoughts as thought (thought.id)}
@@ -78,7 +79,7 @@
 		<input type="hidden" name="page" value={page} />
 		<button
 			type="submit"
-			class="bg-violet-700 font-medium px-4 py-2 text-white rounded-md mt-4 mx-auto block text-sm"
+			class="bg-violet-700 font-medium px-4 py-2 text-white rounded-md mt-4 mx-auto block text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 			disabled={submitting}
 		>
 			{submitting ? label.loading : label.loadmore}

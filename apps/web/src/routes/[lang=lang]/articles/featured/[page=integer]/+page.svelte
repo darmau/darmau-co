@@ -2,10 +2,12 @@
 	import { page as currentPage } from '$app/state';
 	import FeaturedArticle from '$components/FeaturedArticle.svelte';
 	import I18nHead from '$components/I18nHead.svelte';
+	import PageContainer from '$components/PageContainer.svelte';
 	import Pagination from '$components/Pagination.svelte';
 	import Subnav from '$components/Subnav.svelte';
 	import { getSiteContext } from '$lib/context';
 	import HomepageText from '$lib/locales/homepage';
+	import UIText from '$lib/locales/ui';
 	import getLanguageLabel from '$lib/utils/getLanguageLabel';
 	import type { PageProps } from './$types';
 
@@ -14,6 +16,7 @@
 	const site = getSiteContext();
 	const lang = $derived(site.lang);
 	const label = $derived(getLanguageLabel(HomepageText, lang));
+	const uiLabel = $derived(getLanguageLabel(UIText, lang));
 	// 将pathname末尾的page去掉
 	const path = $derived(currentPage.url.pathname.replace(/\/\d+$/, ''));
 	const ogImage = $derived(
@@ -53,16 +56,20 @@
 {/if}
 
 {#if data.articles.length === 0}
-	<div>No articles found</div>
+	<Subnav active="article" />
+	<header class="w-full max-w-6xl mx-auto p-4 md:py-8 mb-8 lg:mb-16">
+		<h1 class="text-3xl font-black text-zinc-700 text-center my-16">{uiLabel.no_articles}</h1>
+	</header>
 {:else}
 	<Subnav active="article" />
-	<h1 class="sr-only">Featured Articles</h1>
-	<div class="w-full max-w-8xl mx-auto p-4 md:py-8 mb-8 lg:mb-16 space-y-8 lg:space-y-12">
+	<!-- 原来硬编码英文「Featured Articles」，中日文用户的读屏会用本地语音引擎念英文 -->
+	<h1 class="sr-only">{label.featured_article_title}</h1>
+	<PageContainer width="wide" class="space-y-8 lg:space-y-12">
 		<div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 			{#each data.articles as article (article.id)}
 				<FeaturedArticle {article} />
 			{/each}
 		</div>
 		<Pagination count={data.articleCount} limit={12} page={data.page} {path} />
-	</div>
+	</PageContainer>
 {/if}

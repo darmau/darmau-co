@@ -75,8 +75,12 @@
 				</span>
 			{:else}
 				<a
-					class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-zinc-900 ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 hover:text-violet-600 focus:z-20 focus:outline-offset-0"
+					class="relative inline-flex items-center px-4 py-2 text-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 hover:text-violet-600 focus:z-20 focus:outline-offset-0 {p ===
+					page
+						? 'bg-violet-50 font-bold text-violet-700 ring-violet-300'
+						: 'font-semibold text-zinc-900'}"
 					href="{path}/{p}"
+					aria-current={p === page ? 'page' : undefined}
 				>
 					{p}
 				</a>

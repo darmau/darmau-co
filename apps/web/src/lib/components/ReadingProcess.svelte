@@ -22,6 +22,12 @@
 	});
 </script>
 
+<!--
+  纯装饰：进度信息在滚动条上已经有了，读屏没必要再念一遍。
+  层级按全站规范放在 nav(40) 之下；只有宽度是动态的，其余都交给 Tailwind。
+-->
 <div
-	style="position: fixed; top: 0; left: 0; width: {scrollProgress}%; height: 2px; background-color: #7c3aed; z-index: 9999; transition: width 0.1s ease-in-out;"
+	aria-hidden="true"
+	class="fixed top-0 left-0 z-30 h-0.5 bg-violet-600 transition-[width] duration-100 ease-in-out"
+	style="width: {scrollProgress}%"
 ></div>

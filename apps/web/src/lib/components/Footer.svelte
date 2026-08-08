@@ -6,12 +6,16 @@
 	import TwitterIcon from '$icons/Twitter.svelte';
 	import YoutubeIcon from '$icons/Youtube.svelte';
 	import type { footerLinks } from '$lib/utils/getFooterLabels';
+	import UIText from '$lib/locales/ui';
+	import getLanguageLabel from '$lib/utils/getLanguageLabel';
 
 	let {
 		lang,
 		currentYear,
 		items
 	}: { lang: string; currentYear: number; items: footerLinks[] } = $props();
+
+	const label = $derived(getLanguageLabel(UIText, lang));
 
 	const social = [
 		{ name: 'GitHub', href: 'https://github.com/darmau', icon: GithubIcon },
@@ -21,18 +25,18 @@
 	];
 </script>
 
-<footer aria-labelledby="footer-heading" class="bg-white border-t border-gray-200">
+<footer aria-labelledby="footer-heading" class="bg-white border-t border-zinc-200">
 	<h2 id="footer-heading" class="sr-only">Footer</h2>
 	<div class="mx-auto max-w-8xl px-6 pb-8 pt-16 sm:pt-24 lg:px-8 lg:pt-32">
 		<div class="xl:grid xl:grid-cols-2 xl:gap-8">
 			<div>
-				<img alt="积薪" src="/logo.svg" class="h-12 mb-4" />
+				<img alt="积薪" src="/logo.svg" class="h-12 w-12 mb-4" width="48" height="48" />
 				{#if lang === 'jp'}
 					<a
 						href="https://blog.with2.net/link/?id=2136562&follow"
 						title="人気ブログランキングでフォロー"
 						target="_blank"
-						rel="noreferrer"
+						rel="noopener noreferrer"
 					>
 						<img
 							alt="人気ブログランキングでフォロー"
@@ -46,9 +50,12 @@
 			<div class="my-16 grid grid-cols-2 lg:grid-cols-4 gap-8 xl:mt-0">
 				{#each items ?? [] as block (block.name)}
 					<div class="flex flex-col gap-4">
-						<h3 class="text-sm font-semibold leading-6 text-gray-900">{block.name}</h3>
+						<h3 class="text-sm font-semibold leading-6 text-zinc-900">{block.name}</h3>
 						{#each block.items as item (item.href)}
-							<a href={item.href} class="text-sm leading-6 text-zinc-600 hover:text-zinc-900">
+							<a
+								href={item.href}
+								class="text-sm leading-6 text-zinc-600 hover:text-zinc-900 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+							>
 								{item.name}
 							</a>
 						{/each}
@@ -57,9 +64,12 @@
 			</div>
 		</div>
 
-		<div class="mt-8 border-t border-gray-900/10 pt-8 md:flex md:items-center md:justify-between">
+		<div class="mt-8 border-t border-zinc-900/10 pt-8 md:flex md:items-center md:justify-between">
 			<div class="flex space-x-6 md:order-2">
-				<a href="/{lang}/rss" class="text-gray-400 hover:text-gray-500">
+				<a
+					href="/{lang}/rss"
+					class="rounded-sm text-zinc-500 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+				>
 					<span class="sr-only">RSS</span>
 					<RSSIcon class="h-6 w-6" />
 				</a>
@@ -67,16 +77,16 @@
 					<a
 						href={item.href}
 						target="_blank"
-						rel="noreferrer"
-						class="text-gray-400 hover:text-gray-500"
+						rel="noopener noreferrer"
+						class="rounded-sm text-zinc-500 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 					>
-						<span class="sr-only">{item.name}</span>
+						<span class="sr-only">{item.name} {label.opens_in_new_window}</span>
 						<item.icon aria-hidden="true" class="h-6 w-6" />
 					</a>
 				{/each}
 			</div>
 			<NotAIIcon class="mt-8 md:order-1 md:mt-0" />
-			<p class="mt-8 text-xs leading-5 text-gray-500 md:order-0 md:mt-0">
+			<p class="mt-8 text-xs leading-5 text-zinc-500 md:order-0 md:mt-0">
 				&copy; 2019 - {currentYear} Design and Develop by 李大毛. All rights reserved.
 			</p>
 		</div>

@@ -121,7 +121,8 @@
 		</div>
 
 		<div class="col-span-1 lg:row-span-2 space-y-4">
-			<h2 class="text-sm text-violet-700 font-medium">{data.albumContent.category!.title}</h2>
+			<!-- 分类只是装饰性的 eyebrow，原来用 h2 会让标题顺序变成 h2 → h1 -->
+			<p class="text-sm text-violet-700 font-medium">{data.albumContent.category!.title}</p>
 			<h1 class="text-zinc-800 font-medium text-3xl">{data.albumContent.title}</h1>
 			<p class="text-zinc-600 text-sm">{getTime(data.albumContent.published_at!, site.lang)}</p>
 			<div class="flex gap-1 items-center justify-start">
@@ -173,13 +174,18 @@
 				{replyingTo}
 				onCancelReply={handleCancelReply}
 			/>
-			<div class="flex flex-col gap-4 divide-y divide-none">
+			<!-- live region 要常驻 DOM 才会被读屏播报，所以容器无条件渲染 -->
+			<div role="alert" class="empty:hidden">
 				{#if form?.error}
-					<p class="mt-2 text-sm text-red-500">{form.error}</p>
+					<p class="mt-2 text-sm text-red-600">{form.error}</p>
 				{/if}
+			</div>
+			<div role="status" class="empty:hidden">
 				{#if form?.success}
-					<p class="mt-2 text-sm text-green-500">{form.success}</p>
+					<p class="mt-2 text-sm text-green-700">{form.success}</p>
 				{/if}
+			</div>
+			<div class="flex flex-col gap-4 divide-y divide-none">
 				{#each data.comments as comment (comment.id)}
 					<CommentBlock comment={comment as unknown as CommentProps} onReply={handleReply} />
 				{/each}
@@ -188,7 +194,7 @@
 				{#if data.page > 1}
 					<a
 						href="?page={data.page - 1}&limit={data.limit}#comment-editor"
-						class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+						class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 					>
 						{label.previous}
 					</a>
@@ -196,7 +202,7 @@
 				{#if data.page < data.totalPage}
 					<a
 						href="?page={data.page + 1}&limit={data.limit}#comment-editor"
-						class="ml-auto rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+						class="ml-auto rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 					>
 						{label.next}
 					</a>

@@ -2,18 +2,86 @@
 
 @theme {
   --max-width-8xl: 1440px;
+
+  /* 系统字体栈 + CJK 兜底。不加 CJK 字体名的话中日文会落到浏览器默认字体，
+     三端呈现完全不一致，font-serif 尤其明显（Georgia/Times 都没有汉字）。 */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB',
+    'Hiragino Sans', 'Yu Gothic', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-serif:
+    ui-serif, Georgia, Cambria, 'Times New Roman', 'Songti SC', 'Hiragino Mincho ProN',
+    'Yu Mincho', 'Noto Serif CJK SC', serif;
+
+  /* 品牌色语义层。全站主色是 violet，这里给个名字，避免继续散落 violet-600/#7c3aed */
+  --color-brand: var(--color-violet-600);
+  --color-brand-strong: var(--color-violet-700);
+  --color-brand-muted: var(--color-violet-500);
+}
+
+/* 导航栏是 fixed 的，正文顶部偏移、锚点 scroll-margin、收起位移原本是四个互不相认的
+   魔法数字（76 / 96 / -88 / top-24）。统一到这里，实测高度 = p-5*2 + h-8 + 1px 边框。 */
+:root {
+  --navbar-height: 73px;
+  --navbar-offset: calc(var(--navbar-height) + 1.5rem);
+  color-scheme: light;
 }
 
 @layer base {
   h2, h3, h4 {
-    scroll-margin-top: 96px;
+    scroll-margin-top: var(--navbar-offset);
   }
 }
 
-@layer iframe-container {
-  iframe {
+@layer components {
+  .iframe-container iframe {
     width: 100%;
     min-height: 480px;
+  }
+}
+
+/* 全局动效兜底：前庭功能障碍用户开启「减少动态效果」后，
+   平滑滚动、位移、淡入淡出全部收敛掉。 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* 页面切换的淡入淡出，由 +layout.svelte 的 onNavigate 触发。
+   浏览器不支持 View Transitions 时整段不生效，页面直接硬切。 */
+::view-transition-old(root) {
+  animation: vt-fade-out 90ms ease-out both;
+}
+
+::view-transition-new(root) {
+  animation: vt-fade-in 180ms ease-in both;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
   }
 }
 

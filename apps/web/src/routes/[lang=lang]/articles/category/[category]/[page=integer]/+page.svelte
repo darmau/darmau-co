@@ -2,6 +2,7 @@
 	import { page as currentPage } from '$app/state';
 	import I18nHead from '$components/I18nHead.svelte';
 	import NormalArticleCard from '$components/NormalArticleCard.svelte';
+	import PageContainer from '$components/PageContainer.svelte';
 	import Pagination from '$components/Pagination.svelte';
 	import ResponsiveImage from '$components/ResponsiveImage.svelte';
 	import Subnav from '$components/Subnav.svelte';
@@ -84,9 +85,7 @@
 			</div>
 		{/if}
 	</header>
-	<div
-		class="w-full max-w-6xl mx-auto p-4 flex flex-col gap-8 md:py-8 mb-8 lg:mb-16 md:grid md:grid-cols-3"
-	>
+	<PageContainer class="flex flex-col gap-8 md:grid md:grid-cols-3">
 		<div class="grow flex flex-col gap-8 md:gap-12 md:col-span-2">
 			{#each data.articles as article (article.id)}
 				<NormalArticleCard {article} showAbstract={true} />
@@ -95,7 +94,8 @@
 		</div>
 		<aside class="pb-4 space-y-8 md:col-span-1">
 			<div class="space-y-4">
-				<h3 class="text-sm font-semibold text-violet-600">{label.year}</h3>
+				<!-- 侧栏标题原来是 h3，页面 h1 之后直接跳到 h3 -->
+				<h2 class="text-sm font-semibold text-violet-600">{label.year}</h2>
 				<ol class="">
 					{#each data.countByYear as year (year.year)}
 						<li class="p-2 rounded-md hover:bg-zinc-50 cursor-pointer">
@@ -107,7 +107,7 @@
 				</ol>
 			</div>
 			<div class="space-y-4">
-				<h3 class="text-sm font-semibold text-violet-600">{label.category}</h3>
+				<h2 class="text-sm font-semibold text-violet-600">{label.category}</h2>
 				<ol class="">
 					{#each data.countByCategory as category (category.slug)}
 						{#if category.count !== 0}
@@ -124,5 +124,5 @@
 				</ol>
 			</div>
 		</aside>
-	</div>
+	</PageContainer>
 {/if}

@@ -35,6 +35,7 @@
 	import XMark from '$icons/XMark.svelte';
 	import getLanguageLabel from '$lib/utils/getLanguageLabel';
 	import AlbumText from '$lib/locales/album';
+	import UIText from '$lib/locales/ui';
 
 	let {
 		mapboxToken,
@@ -58,6 +59,16 @@
 	let hasFitToBounds = false;
 
 	const label = $derived(getLanguageLabel(AlbumText, lang));
+	const uiLabel = $derived(getLanguageLabel(UIText, lang));
+
+	// Mapbox 的 paint 表达式只吃字面色值，用不了 Tailwind class。
+	// 这几个值对应 app.css 里的品牌色 violet-600/700/800，改主色时要一起改。
+	const BRAND = { base: '#7c3aed', mid: '#6d28d9', deep: '#5b21b6' } as const;
+
+	// 用户开了「减少动态效果」时，地图飞行动画直接跳到终点
+	const prefersReducedMotion = () =>
+		typeof window !== 'undefined' &&
+		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 	// 使用 Intersection Observer 延迟加载地图，直到容器进入视口
 	onMount(() => {
@@ -90,8 +101,7 @@
 		map?.flyTo({
 			center: feature.geometry.coordinates,
 			zoom: 15,
-			duration: 1000,
-			essential: true
+			duration: prefersReducedMotion() ? 0 : 1000
 		});
 	}
 
@@ -152,11 +162,11 @@
 						'circle-color': [
 							'step',
 							['get', 'point_count'],
-							'#7c3aed', // 紫色
+							BRAND.base,
 							10,
-							'#6d28d9',
+							BRAND.mid,
 							30,
-							'#5b21b6'
+							BRAND.deep
 						],
 						'circle-radius': [
 							'step',
@@ -193,7 +203,7 @@
 					source: 'photos',
 					filter: ['!', ['has', 'point_count']],
 					paint: {
-						'circle-color': '#7c3aed',
+						'circle-color': BRAND.base,
 						'circle-radius': 8,
 						'circle-stroke-width': 2,
 						'circle-stroke-color': '#fff'
@@ -248,7 +258,8 @@
 							if (geometry.type === 'Point' && zoom !== null) {
 								mapInstance.easeTo({
 									center: geometry.coordinates as [number, number],
-									zoom: zoom
+									zoom: zoom,
+									duration: prefersReducedMotion() ? 0 : undefined
 								});
 							}
 						});
@@ -275,8 +286,8 @@
 						mapInstance.flyTo({
 							center: fullFeature.geometry.coordinates,
 							zoom: 15, // 缩放级别：15 = 街道级别，可以看清周围环境
-							duration: 1000, // 动画持续时间（毫秒）
-							essential: true // 即使用户开启了"减少动画"设置也执行
+							// 用户开了「减少动态效果」时直接跳过去，不做飞行动画
+							duration: prefersReducedMotion() ? 0 : 1000
 						});
 					}
 				});
@@ -356,29 +367,27 @@
 			class="absolute top-2 md:top-4 w-[90%] md:w-96 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-4 max-h-[800px] overflow-y-auto bg-white rounded-lg shadow-xl z-10"
 		>
 			<div
-				class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10"
+				class="sticky top-0 bg-white border-b border-zinc-200 p-4 flex justify-between items-center z-10"
 			>
 				<h3 class="text-lg font-semibold text-zinc-800">
 					{label.map_title} ({clusterImages.length})
 				</h3>
-				<button onclick={() => (clusterImages = [])} class="text-zinc-500 hover:text-zinc-700">
+				<button
+					type="button"
+					onclick={() => (clusterImages = [])}
+					class="rounded-sm text-zinc-500 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+				>
+					<span class="sr-only">{uiLabel.dismiss}</span>
 					<XMark class="h-6 w-6" />
 				</button>
 			</div>
 
 			<div class="p-4 space-y-3">
 				{#each clusterImages as feature (feature.properties.imageId)}
-					<div
+					<button
+						type="button"
 						onclick={() => selectFeature(feature)}
-						onkeydown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								e.preventDefault();
-								selectFeature(feature);
-							}
-						}}
-						role="button"
-						tabindex="0"
-						class="cursor-pointer rounded-lg overflow-hidden bg-zinc-50 hover:bg-zinc-100 transition-colors border border-zinc-200 hover:border-violet-300"
+						class="w-full text-left cursor-pointer rounded-lg overflow-hidden bg-zinc-50 hover:bg-zinc-100 transition-colors border border-zinc-200 hover:border-violet-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 					>
 						<div class="relative aspect-4/3 overflow-hidden bg-zinc-100">
 							<img
@@ -406,7 +415,7 @@
 								</p>
 							{/if}
 						</div>
-					</div>
+					</button>
 				{/each}
 			</div>
 		</div>
@@ -421,7 +430,12 @@
 				<h3 class="text-lg font-semibold text-zinc-800">
 					{selectedImage.properties.location || label.map_title}
 				</h3>
-				<button onclick={() => (selectedImage = null)} class="text-zinc-500 hover:text-zinc-700">
+				<button
+					type="button"
+					onclick={() => (selectedImage = null)}
+					class="rounded-sm text-zinc-500 hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+				>
+					<span class="sr-only">{uiLabel.dismiss}</span>
 					<XMark class="h-6 w-6" />
 				</button>
 			</div>

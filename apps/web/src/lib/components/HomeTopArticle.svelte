@@ -37,7 +37,8 @@
 			{/if}
 		{/if}
 		<div class="flex flex-col gap-3 sm:grow">
-			<div class="text-zinc-400 text-sm">
+			<!-- zinc-400 在白底上只有 2.6:1，达不到 WCAG AA 的 4.5:1 -->
+			<div class="text-zinc-500 text-sm">
 				<span class="text-violet-700 font-medium">{article.category.title}</span>&nbsp;·&nbsp;<span
 					>{getTime(article.published_at, site.lang)}</span
 				>
@@ -48,7 +49,8 @@
 				{/if}
 				<h2 class="font-medium {isTop ? 'text-3xl' : 'text-2xl'}">{article.title}</h2>
 			</div>
-			<h3 class="text-base text-zinc-500 leading-7">{article.subtitle}</h3>
+			<!-- 副标题不是独立的一节内容，用 p；卡片主标题保留 h2 -->
+			<p class="text-base text-zinc-500 leading-7">{article.subtitle}</p>
 			{#if article.topic}
 				<div class="flex flex-wrap gap-2">
 					{#each article.topic as topic, index (index)}
@@ -65,11 +67,11 @@
 			{/if}
 			<div class="flex gap-3 justify-start items-center">
 				<div class="flex gap-1 items-center">
-					<Eye class="h-4 w-4 inline-block text-zinc-400" />
+					<Eye class="h-4 w-4 inline-block text-zinc-500" />
 					<span class="text-zinc-500 text-sm">{article.page_view}</span>
 				</div>
 				<div class="flex gap-1 items-center">
-					<ChatBubbleOvalLeft class="h-4 w-4 inline-block text-zinc-400" />
+					<ChatBubbleOvalLeft class="h-4 w-4 inline-block text-zinc-500" />
 					<span class="text-zinc-500 text-sm">{article.comments[0].count}</span>
 				</div>
 			</div>
