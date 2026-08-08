@@ -1,0 +1,13 @@
+<!doctype html>
+<!-- %lang% 由 hooks.server.ts 的 transformPageChunk 按当前路径的语言段替换 -->
+<html lang="%lang%" class="scroll-smooth">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover" class="min-h-screen flex flex-col relative">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

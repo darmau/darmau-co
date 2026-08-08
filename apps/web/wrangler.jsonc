@@ -1,12 +1,14 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "firewood-web",
-  "main": "./workers/app.ts",
+  // SvelteKit 的 adapter-cloudflare 把 Worker 和静态资源一起产出到 .svelte-kit/cloudflare
+  "main": ".svelte-kit/cloudflare/_worker.js",
   "compatibility_date": "2025-11-07",
+  // SvelteKit 运行时要 node:async_hooks
   "compatibility_flags": ["nodejs_compat"],
-  // 静态资源优先命中 build/client；命不中的请求才交给上面的 Worker 做 SSR
+  // 静态资源优先命中；命不中的请求才交给上面的 Worker 做 SSR
   "assets": {
-    "directory": "./build/client",
+    "directory": ".svelte-kit/cloudflare",
     "binding": "ASSETS"
   },
   "ai": {
