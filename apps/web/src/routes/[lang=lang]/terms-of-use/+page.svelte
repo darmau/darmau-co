@@ -41,6 +41,7 @@
 	<article
 		class="mt-10 space-y-6 text-base leading-8 text-zinc-700 [&_h2]:mt-12 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-zinc-800 [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-zinc-700 [&_strong]:font-semibold [&_a]:text-violet-700 [&_a]:underline [&_a]:underline-offset-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_blockquote]:border-l-2 [&_blockquote]:border-violet-600 [&_blockquote]:pl-4 [&_blockquote]:text-zinc-600 [&_hr]:my-10"
 	>
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- 内容来自仓库内的 legal/*.md，不是用户输入 -->
 		{@html data.html}
 	</article>
 </section>

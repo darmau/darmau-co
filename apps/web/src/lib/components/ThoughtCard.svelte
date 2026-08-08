@@ -36,6 +36,8 @@
 	import ChatBubbleOvalLeft from '$icons/ChatBubbleOvalLeft.svelte';
 	import EyeSolid from '$icons/EyeSolid.svelte';
 
+	// Thought 是数据库行的形状，id 由父组件当 each key 用，本组件模板里用不到
+	// eslint-disable-next-line svelte/no-unused-props
 	let { thought }: { thought: Thought } = $props();
 
 	const site = getSiteContext();

@@ -25,4 +25,5 @@
 	});
 </script>
 
+<!-- eslint-disable-next-line svelte/no-at-html-tags -- 上游 commentContent 先转义再交给 marked 渲染 -->
 <div class="comment-markdown">{@html html}</div>

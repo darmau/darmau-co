@@ -396,6 +396,7 @@
 							</div>
 						</div>
 						{#if plainArticleHtml}
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -- 由本文件的 renderPlainArticleHtml 生成，文本节点已转义 -->
 							<div aria-hidden="true" style="display: none">{@html plainArticleHtml}</div>
 						{/if}
 					{/if}
@@ -412,7 +413,7 @@
 					/>
 					<div class="mt-16 col-span-1 lg:col-span-2">
 						<CommentEditor
-							contentTable={'to_article'}
+							contentTable="to_article"
 							contentId={article.id}
 							{session}
 							{replyingTo}

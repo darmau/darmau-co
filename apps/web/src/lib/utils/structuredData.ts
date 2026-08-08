@@ -3,8 +3,8 @@
  * 用于生成 Schema.org 结构化数据的工具函数
  */
 
+import type { Json } from "@darmau/database";
 import type { Article } from "$lib/types/Article";
-import type { Image } from "$lib/types/Image";
 
 // 站点作者信息
 const SITE_AUTHOR = {
@@ -63,9 +63,10 @@ export function generateArticleStructuredData(params: {
   lang: string;
   url: string;
 }) {
-  const { article, baseUrl, imgPrefix, lang, url } = params;
+  // baseUrl 在这个函数里用不到，但调用方按同一份 params 传，保留在类型里
+  const { article, imgPrefix, lang, url } = params;
 
-  const structuredData: any = {
+  const structuredData: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
@@ -186,7 +187,7 @@ export function generateAlbumStructuredData(params: {
       storage_key: string;
       width: number;
       height: number;
-      exif: any;
+      exif: Json;
       location: string | null;
       latitude: number | null;
       longitude: number | null;
@@ -202,7 +203,7 @@ export function generateAlbumStructuredData(params: {
 }) {
   const { album, imgPrefix, lang, url } = params;
 
-  const structuredData: any = {
+  const structuredData: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ImageGallery",
     name: album.title,
@@ -231,7 +232,7 @@ export function generateAlbumStructuredData(params: {
   // 添加所有图片
   if (album.images && album.images.length > 0) {
     structuredData.associatedMedia = album.images.map((image) => {
-      const imageObject: any = {
+      const imageObject: Record<string, unknown> = {
         "@type": "ImageObject",
         contentUrl: `${imgPrefix}/${image.storage_key}`,
         url: `${imgPrefix}/cdn-cgi/image/format=jpeg,width=960/${image.storage_key}`,
@@ -255,7 +256,9 @@ export function generateAlbumStructuredData(params: {
 
       // 添加地理位置信息
       if (image.latitude && image.longitude) {
-        imageObject.contentLocation = {
+        // 先把对象拼完整再挂到 imageObject 上：imageObject 是
+        // Record<string, unknown>，属性读回来是 unknown，没法再往里写
+        const contentLocation: Record<string, unknown> = {
           "@type": "Place",
           geo: {
             "@type": "GeoCoordinates",
@@ -265,8 +268,10 @@ export function generateAlbumStructuredData(params: {
         };
 
         if (image.location) {
-          imageObject.contentLocation.name = image.location;
+          contentLocation.name = image.location;
         }
+
+        imageObject.contentLocation = contentLocation;
       }
 
       return imageObject;
@@ -317,7 +322,7 @@ export function generateThoughtStructuredData(params: {
   // 使用前100个字符作为标题
   const headline = thought.content_text.slice(0, 100);
 
-  const structuredData: any = {
+  const structuredData: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "SocialMediaPosting",
     headline,
@@ -418,7 +423,7 @@ export function generateCommentStructuredData(params: {
   const { comments, articleUrl } = params;
 
   return comments.map((comment) => {
-    const structuredData: any = {
+    const structuredData: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Comment",
       "@id": `${articleUrl}#comment-${comment.id}`,
@@ -529,6 +534,6 @@ export function generatePersonStructuredData(params: {
  * 将结构化数据序列化为 JSON-LD script 标签
  * Serialize structured data to JSON-LD script tag
  */
-export function serializeStructuredData(data: any): string {
+export function serializeStructuredData(data: unknown): string {
   return JSON.stringify(data, null, 2);
 }

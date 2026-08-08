@@ -7,7 +7,16 @@ import svelteConfig from './svelte.config.js';
 export default tseslint.config(
   {
     // flat config 不读 .eslintignore，生成产物必须在这里排除
-    ignores: ['.svelte-kit/**', '.wrangler/**', 'build/**', 'static/**', 'node_modules/**']
+    // worker-configuration.d.ts 由 `pnpm typegen`（wrangler types）生成，自带的
+    // eslint-disable 指令在我们这套规则下是多余的，lint 它没有意义
+    ignores: [
+      '.svelte-kit/**',
+      '.wrangler/**',
+      'build/**',
+      'static/**',
+      'node_modules/**',
+      'worker-configuration.d.ts'
+    ]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

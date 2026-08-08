@@ -55,7 +55,7 @@ function generateRss({description, entries, link, title, language}: {
   `;
 }
 
-export const GET: RequestHandler = async ({ params, locals, platform }) => {
+export const GET: RequestHandler = async ({ params, locals }) => {
   const supabase = locals.supabase;
   const lang = params.lang;
   const label = getLanguageLabel(HomepageText, lang);

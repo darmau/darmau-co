@@ -121,7 +121,7 @@ export function cleanupExpiredViews(): void {
             localStorage.removeItem(key);
           }
         }
-      } catch (error) {
+      } catch {
         // 如果解析失败，删除无效记录
         localStorage.removeItem(key);
       }
