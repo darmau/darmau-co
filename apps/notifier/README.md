@@ -57,13 +57,21 @@ pnpm --filter notifier exec wrangler secret put WEBHOOK_SECRET
 部署之后还要做的（都在 Cloudflare / Supabase 控制台，代码里做不了）：
 
 1. 把发件域名 onboard 到 Cloudflare Email Service（要求域名用 Cloudflare DNS）
-2. 在生产库设置这两个 GUC（`<WEBHOOK_SECRET>` 从 `.dev.vars` 取），
-   然后才能 `pnpm --filter @darmau/database db:push` 跑 repoint 迁移：
+2. 在 Supabase 控制台 → SQL Editor 里把 `WEBHOOK_SECRET` 存进 Vault
+   （值从 `.dev.vars` 取），然后才能 `pnpm --filter @darmau/database db:push`
+   跑 repoint 迁移：
 
    ```sql
-   alter database postgres set app.settings.notifier_url = 'https://notify.darmau.co';
-   alter database postgres set app.settings.notifier_secret = '<WEBHOOK_SECRET>';
+   select vault.create_secret(
+     '<WEBHOOK_SECRET>',
+     'notifier_secret',
+     'apps/notifier 的 Bearer token'
+   );
    ```
+
+   用 Vault 而不是 `alter database ... set app.settings.*`，是因为 Supabase 的
+   postgres 角色不是数据库 owner，ALTER DATABASE 会报 42501。Worker 的地址不是
+   秘密，直接写死在迁移的函数里了。
 
 3. Supabase 控制台 → Database Webhooks：把 `bark` 和 `ip-info` 的目标分别改成
    `https://notify.darmau.co/bark` 和 `https://notify.darmau.co/ip-info`，
