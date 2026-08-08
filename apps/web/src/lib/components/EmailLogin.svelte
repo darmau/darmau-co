@@ -36,7 +36,7 @@
 <form method="POST" action="?/login" use:enhance={handleSubmit}>
 	<div class="space-y-6">
 		<div>
-			<label for="email" class="block text-sm font-medium leading-6 text-gray-900">
+			<label for="email" class="block text-sm font-medium leading-6 text-zinc-900">
 				{label.email}
 			</label>
 			<div class="mt-2">
@@ -45,8 +45,9 @@
 					name="email"
 					type="email"
 					required
+					aria-required="true"
 					autocomplete="email"
-					class="block w-full rounded-md border-0 p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6 disabled:opacity-50"
+					class="block w-full rounded-md border-0 p-1.5 text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-500 focus:ring-2 focus:ring-inset focus:ring-violet-600 sm:text-sm sm:leading-6 disabled:opacity-50"
 					placeholder="name@example.com"
 					disabled={isDisabled}
 				/>
@@ -59,7 +60,7 @@
 				type="submit"
 				name="intent"
 				value="email"
-				class="flex w-full justify-center rounded-md bg-violet-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-70"
+				class="flex w-full justify-center rounded-md bg-violet-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-violet-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-70"
 				disabled={isDisabled}
 			>
 				{label.send_link}
@@ -67,9 +68,12 @@
 		</div>
 	</div>
 
-	{#if form?.error}
-		<div class="mt-6">
-			<p class="text-sm text-red-600">{form.error}</p>
-		</div>
-	{/if}
+	<!-- use:enhance 提交后没有导航，错误只是凭空多出一段文字，用 role="alert" 让读屏立即播报 -->
+	<div role="alert">
+		{#if form?.error}
+			<div class="mt-6">
+				<p class="text-sm text-red-600">{form.error}</p>
+			</div>
+		{/if}
+	</div>
 </form>

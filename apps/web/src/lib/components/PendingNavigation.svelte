@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { navigating } from '$app/state';
+	import UIText from '$lib/locales/ui';
+	import getLanguageLabel from '$lib/utils/getLanguageLabel';
+
+	let { lang }: { lang: string } = $props();
+
+	const label = $derived(getLanguageLabel(UIText, lang));
 </script>
 
 {#if navigating.to}
-	<div class="fixed inset-0 flex items-center justify-center z-50">
+	<div role="status" class="fixed inset-0 flex items-center justify-center z-60">
+		<span class="sr-only">{label.loading}</span>
 		<div class="animate-spin">
 			<svg
 				class="h-12 w-12 text-violet-700"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
+				aria-hidden="true"
 				viewBox="0 0 24 24"
 			>
 				<circle

@@ -2,6 +2,7 @@
 	import { page as currentPage } from '$app/state';
 	import I18nHead from '$components/I18nHead.svelte';
 	import NormalArticleCard from '$components/NormalArticleCard.svelte';
+	import PageContainer from '$components/PageContainer.svelte';
 	import Pagination from '$components/Pagination.svelte';
 	import Subnav from '$components/Subnav.svelte';
 	import { getSiteContext } from '$lib/context';
@@ -55,10 +56,9 @@
 	</header>
 {:else}
 	<Subnav active="article" />
-	<h1 class="sr-only">Articles</h1>
-	<div
-		class="w-full max-w-6xl mx-auto p-4 md:py-8 mb-8 lg:mb-16 flex flex-col gap-8 md:grid md:grid-cols-3"
-	>
+	<!-- 原来硬编码英文「Articles」，中日文用户的读屏会用本地语音引擎念英文 -->
+	<h1 class="sr-only">{homeLabel.recent_article}</h1>
+	<PageContainer class="flex flex-col gap-8 md:grid md:grid-cols-3">
 		<div class="grow flex flex-col gap-8 py-8 md:py-0 md:gap-12 md:col-span-2">
 			{#each data.articles as article (article.id)}
 				<NormalArticleCard {article} showAbstract={true} />
@@ -67,7 +67,8 @@
 		</div>
 		<aside class="pb-4 space-y-8 md:col-span-1">
 			<div class="space-y-4">
-				<h3 class="text-sm font-semibold text-violet-600">{label.year}</h3>
+				<!-- 侧栏标题原来是 h3，页面 h1 之后直接跳到 h3 -->
+				<h2 class="text-sm font-semibold text-violet-600">{label.year}</h2>
 				<ol class="">
 					{#if data.countByYear && data.countByYear.length > 0}
 						{#each data.countByYear as year (year.year)}
@@ -78,12 +79,12 @@
 							</li>
 						{/each}
 					{:else}
-						<li class="text-sm text-zinc-400 p-2">暂无数据</li>
+						<li class="text-sm text-zinc-500 p-2">{label.no_data}</li>
 					{/if}
 				</ol>
 			</div>
 			<div class="space-y-4">
-				<h3 class="text-sm font-semibold text-violet-600">{label.category}</h3>
+				<h2 class="text-sm font-semibold text-violet-600">{label.category}</h2>
 				<ol class="">
 					{#each data.countByCategory as category (category.slug)}
 						{#if category.count !== 0}
@@ -100,5 +101,5 @@
 				</ol>
 			</div>
 		</aside>
-	</div>
+	</PageContainer>
 {/if}

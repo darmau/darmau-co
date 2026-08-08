@@ -2,6 +2,8 @@
 	import type { Json } from '@darmau/database';
 	import type { Content } from '$components/ContentContainer.svelte';
 	import ShareButton from '$components/ShareButton.svelte';
+	import UIText from '$lib/locales/ui';
+	import getLanguageLabel from '$lib/utils/getLanguageLabel';
 
 	let {
 		content,
@@ -9,6 +11,8 @@
 		title,
 		lang
 	}: { content: Json; url: string; title: string; lang: string } = $props();
+
+	const label = $derived(getLanguageLabel(UIText, lang));
 
 	// 原来的类型守卫 isContentStructure：只认「对象且带 content 数组」
 	function toContentArray(value: Json): Content[] | null {
@@ -33,11 +37,16 @@
 
 {#if !content || !article}
 	<div>
-		<p>没有目录</p>
+		<p>{label.no_catalog}</p>
 	</div>
 {:else}
-	<nav aria-label="Table of contents" class="md:w-full md:sticky md:top-24 md:h-fit space-y-6">
-		<div class="flex flex-col gap-2 border-b border-gray-200 pb-6">
+	<!-- sticky 顶部偏移跟随导航栏高度，不再写死 top-24 -->
+	<nav
+		aria-label={label.catalog}
+		class="md:w-full md:sticky md:h-fit space-y-6"
+		style="top: var(--navbar-offset)"
+	>
+		<div class="flex flex-col gap-2 border-b border-zinc-200 pb-6">
 			{#each toc as heading, index (index)}
 				{#if heading.attrs?.level === 2}
 					<a

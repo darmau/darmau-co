@@ -1,7 +1,9 @@
 <script lang="ts">
-	import { invalidate } from '$app/navigation';
+	import { invalidate, onNavigate } from '$app/navigation';
 	import { navigating } from '$app/state';
 	import '../app.css';
+	import UIText from '$lib/locales/ui';
+	import getLanguageLabel from '$lib/utils/getLanguageLabel';
 	import Banners from '$components/Banners.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Navbar from '$components/Navbar.svelte';
@@ -16,6 +18,22 @@
 	const SITE_NAMES: Record<string, string> = { zh: '积薪', en: 'Firewood', jp: '積薪' };
 
 	const siteName = $derived(SITE_NAMES[data.lang] ?? '积薪');
+
+	const label = $derived(getLanguageLabel(UIText, data.lang));
+
+	// 页面级淡入淡出。不支持 View Transitions 或用户开了「减少动态效果」时直接跳过，
+	// 走原来的硬切。动画曲线定义在 app.css 的 ::view-transition-* 里。
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 
 	const websiteJsonLd = $derived(
 		generateWebsiteStructuredData({
@@ -63,10 +81,22 @@
 
 <JsonLd data={websiteJsonLd} />
 
+<a
+	href="#main"
+	class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-100 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-violet-700 focus:shadow-lg focus:outline-2 focus:outline-offset-2 focus:outline-violet-600"
+>
+	{label.skip_to_content}
+</a>
+
 <Navbar lang={data.lang} items={data.navbarItems} />
-<PendingNavigation />
-<main class="flex-1 w-full mt-[76px] {navigating.to ? 'opacity-30' : ''}">
-	<Banners lang={data.lang} />
+<PendingNavigation lang={data.lang} />
+<main
+	id="main"
+	class="flex-1 w-full transition-opacity duration-200 {navigating.to ? 'opacity-30' : ''}"
+	style="margin-top: var(--navbar-height)"
+>
 	{@render children()}
 </main>
+<!-- Banners 是 fixed 的，放在 main 里会被 main 导航期间的 opacity 层叠上下文捕获 -->
+<Banners lang={data.lang} />
 <Footer lang={data.lang} currentYear={data.currentYear} items={data.footerItems} />

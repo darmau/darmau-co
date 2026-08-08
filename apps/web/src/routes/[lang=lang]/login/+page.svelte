@@ -3,6 +3,7 @@
 	import GithubLogin from '$components/GithubLogin.svelte';
 	import I18nHead from '$components/I18nHead.svelte';
 	import SignupText from '$lib/locales/signup';
+	import getLegalContent from '$lib/locales/legal';
 	import getLanguageLabel from '$lib/utils/getLanguageLabel';
 	import type { PageProps } from './$types';
 
@@ -10,6 +11,7 @@
 
 	const lang = $derived(data.lang);
 	const label = $derived(getLanguageLabel(SignupText, lang));
+	const legalLabel = $derived(getLegalContent(lang));
 	const queryError = $derived(data.error === 'magic_link' ? label.magic_link_error : null);
 	const errorMessage = $derived(form?.error ?? queryError);
 </script>
@@ -26,8 +28,9 @@
 		<h2 class="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-zinc-900">
 			{label.log_in_title}
 		</h2>
+		<!-- zinc-400 在白底上只有 2.6:1，达不到 WCAG AA 的 4.5:1，统一提到 zinc-500 -->
 		<p class="mt-6 text-center text-base text-zinc-500">{label.log_in_description}</p>
-		<p class="mt-2 text-center text-sm text-zinc-400">{label.magic_link_hint}</p>
+		<p class="mt-2 text-center text-sm text-zinc-500">{label.magic_link_hint}</p>
 	</div>
 
 	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
@@ -35,25 +38,36 @@
 			 现在 EmailLogin 自带 <form action="?/login">，GithubLogin 是纯客户端按钮，
 			 再套一层 form 会变成非法的表单嵌套，所以这里退化成一个纯样式容器。 -->
 		<div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-			{#if form?.success}
-				<div class="rounded-md bg-green-50 p-4 text-sm text-green-700">
-					{label.email_check}
-				</div>
-			{:else}
+			<!-- 发送成功后表单会被这段提示整体替换掉，没有页面跳转，用 role="status" 播报 -->
+			<div role="status">
+				{#if form?.success}
+					<div class="rounded-md bg-green-50 p-4 text-sm text-green-700">
+						{label.email_check}
+					</div>
+				{/if}
+			</div>
+			{#if !form?.success}
 				<!-- 提示由本路由渲染，所以不给组件传 form，免得出现两条一样的错误 -->
 				<EmailLogin />
 			{/if}
 
-			{#if errorMessage}
-				<div class="mt-6">
-					<p class="text-sm text-red-600">{errorMessage}</p>
-				</div>
-			{/if}
+			<div role="alert">
+				{#if errorMessage}
+					<div class="mt-6">
+						<p class="text-sm text-red-600">{errorMessage}</p>
+					</div>
+				{/if}
+			</div>
 
 			<GithubLogin />
 		</div>
 		<div class="mt-6 text-center text-sm text-zinc-500">
-			<a href="/{lang}/terms-of-use">Terms of Use</a>
+			<a
+				href="/{lang}/terms-of-use"
+				class="rounded-sm underline hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
+			>
+				{legalLabel.title}
+			</a>
 		</div>
 	</div>
 </div>

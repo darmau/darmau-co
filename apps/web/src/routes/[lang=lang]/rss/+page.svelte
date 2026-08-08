@@ -44,6 +44,13 @@
 <svelte:head>
 	<title>{label.page_title}</title>
 	<meta name="description" content={label.page_description} />
+	<!-- 这页专门介绍订阅方式，却是全站唯一没有声明 feed 的页面，浏览器/阅读器发现不了 -->
+	<link
+		rel="alternate"
+		type="application/rss+xml"
+		title="RSS"
+		href="{data.baseUrl}/{lang}/rss.xml"
+	/>
 </svelte:head>
 
 <I18nHead baseUrl={data.baseUrl} {lang} availableLangs={data.availableLangs} path="rss" />
@@ -51,21 +58,23 @@
 <Subnav active="about" />
 <div class="w-full max-w-8xl mx-auto p-4 md:py-8 my-8">
 	<header class="text-center space-y-2 mb-12">
-		<h2 class="font-medium text-sm text-violet-700">RSS</h2>
+		<!-- 装饰性的 eyebrow，原来用 h2 会排在 h1 前面 -->
+		<p class="font-medium text-sm text-violet-700">RSS</p>
 		<h1 class="font-medium text-zinc-900 text-3xl lg:text-4xl">{label.title}</h1>
 		<p class="text-base text-zinc-600">{label.description}</p>
 	</header>
 
 	<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-		<section class="rounded-2xl border border-gray-200 shadow-lg">
-			<div class="p-4 lg:p-8 border-b border-gray-200 space-y-4">
-				<h3 class="font-medium text-lg text-zinc-700">{label.article}</h3>
+		<section class="rounded-2xl border border-zinc-200 shadow-lg">
+			<div class="p-4 lg:p-8 border-b border-zinc-200 space-y-4">
+				<!-- 三个分区标题原来是 h3，紧跟在 h1 后面属于跳级 -->
+				<h2 class="font-medium text-lg text-zinc-700">{label.article}</h2>
 				<code class="text-sm block font-mono text-zinc-600"
 					>{`https://darmau.co/${lang}/article/rss.xml`}</code
 				>
 				<button
 					onclick={() => copyToClipboard(`https://darmau.co/${lang}/article/rss.xml`, 'article')}
-					class="bg-violet-600 text-white font-medium py-3 w-full rounded-md"
+					class="bg-violet-600 text-white font-medium py-3 w-full rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 				>
 					{copiedArticle ? label.copied : label.copy}
 				</button>
@@ -74,22 +83,22 @@
 				<ol class="space-y-4 p-4 lg:p-8">
 					{#each data.articles as article (article.id)}
 						<li>
-							<h4 class="font-medium text-zinc-700">{article.title}</h4>
+							<h3 class="font-medium text-zinc-700">{article.title}</h3>
 							<p class="text-zinc-500 mt-1">{article.subtitle}</p>
 						</li>
 					{/each}
 				</ol>
 			{/if}
 		</section>
-		<section class="rounded-2xl border border-gray-200 shadow-lg">
-			<div class="p-4 lg:p-8 border-b border-gray-200 space-y-4">
-				<h3 class="font-medium text-lg text-zinc-700">{label.photography}</h3>
+		<section class="rounded-2xl border border-zinc-200 shadow-lg">
+			<div class="p-4 lg:p-8 border-b border-zinc-200 space-y-4">
+				<h2 class="font-medium text-lg text-zinc-700">{label.photography}</h2>
 				<code class="text-sm block font-mono text-zinc-600"
 					>{`https://darmau.co/${lang}/album/rss.xml`}</code
 				>
 				<button
 					onclick={() => copyToClipboard(`https://darmau.co/${lang}/album/rss.xml`, 'photo')}
-					class="bg-violet-600 text-white font-medium py-3 w-full rounded-md"
+					class="bg-violet-600 text-white font-medium py-3 w-full rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 				>
 					{copiedPhoto ? label.copied : label.copy}
 				</button>
@@ -110,15 +119,15 @@
 				{/if}
 			</div>
 		</section>
-		<section class="rounded-2xl border border-gray-200 shadow-lg">
-			<div class="p-4 lg:p-8 border-b border-gray-200 space-y-4">
-				<h3 class="font-medium text-lg text-zinc-700">{label.thought}</h3>
+		<section class="rounded-2xl border border-zinc-200 shadow-lg">
+			<div class="p-4 lg:p-8 border-b border-zinc-200 space-y-4">
+				<h2 class="font-medium text-lg text-zinc-700">{label.thought}</h2>
 				<code class="text-sm block font-mono text-zinc-600"
 					>{`https://darmau.co/${lang}/thought/rss.xml`}</code
 				>
 				<button
 					onclick={() => copyToClipboard(`https://darmau.co/${lang}/thought/rss.xml`, 'thought')}
-					class="bg-violet-600 text-white font-medium py-3 w-full rounded-md"
+					class="bg-violet-600 text-white font-medium py-3 w-full rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 				>
 					{copiedThought ? label.copied : label.copy}
 				</button>

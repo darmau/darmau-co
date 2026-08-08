@@ -15,39 +15,56 @@
 	const highResSrcSet = $derived(
 		`${highResSrc} 1x, ${site.prefix}/cdn-cgi/image/format=auto,width=1280/${attrs.storage_key} 2x`
 	);
+
+	// 容器高度原本完全由高清图撑开，正文配图加载前后必然抖动。
+	// CMS 存了原始宽高，用它算出比例先把位置占住。
+	const aspectRatio = $derived(
+		attrs.width && attrs.height ? `${attrs.width} / ${attrs.height}` : '3 / 2'
+	);
 </script>
 
 <figure class="my-8">
-	<div class="relative overflow-hidden rounded-md" id="image-{attrs.id}">
-		<!-- Low resolution blurred image -->
+	<div
+		class="relative overflow-hidden rounded-md bg-zinc-100"
+		id="image-{attrs.id}"
+		style="aspect-ratio: {aspectRatio}"
+	>
+		<!-- 模糊占位图：纯装饰，alt 必须为空，否则读屏会把同一张图的描述念两遍 -->
 		<img
 			class="brightness-110 absolute inset-0 w-full h-full object-cover transition-opacity duration-300 {imageLoaded
 				? 'opacity-0'
 				: 'opacity-100'}"
 			src="{site.prefix}/cdn-cgi/image/format=auto,width=24/{attrs.storage_key}"
-			alt={attrs.alt ?? ''}
+			alt=""
+			aria-hidden="true"
 			width="740"
 			style="filter: blur(36px)"
 		/>
 
 		<!-- High resolution image -->
-		<picture class="transition-opacity duration-300 {imageLoaded ? 'opacity-100' : 'opacity-0'}">
+		<picture
+			class="block w-full h-full transition-opacity duration-300 {imageLoaded
+				? 'opacity-100'
+				: 'opacity-0'}"
+		>
 			<source media="(max-width: 639px)" srcset={highResSrc} />
 			<source media="(min-width: 640px)" srcset={highResSrcSet} />
 			<img
-				class="group-hover:scale-105 w-full h-full object-cover transition-all duration-300"
+				class="w-full h-full object-cover"
 				src={highResSrc}
 				srcset={highResSrcSet}
-				sizes="(max-width: 720px) 100vw, 2x"
+				sizes="(max-width: 720px) 100vw, 740px"
 				alt={attrs.alt ?? ''}
 				width="740"
+				loading="lazy"
+				decoding="async"
 				onload={() => (imageLoaded = true)}
 			/>
 		</picture>
 	</div>
 	{#if attrs.caption}
 		<figcaption class="my-3 flex justify-start items-start gap-2 text-zinc-600">
-			<InformationCircle class="mt-0.5 w-5 h-5 inline-block text-zinc-400" />
+			<InformationCircle class="mt-0.5 w-5 h-5 inline-block text-zinc-500" />
 			{attrs.caption}
 		</figcaption>
 	{/if}

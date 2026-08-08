@@ -26,6 +26,11 @@
 	// 下面这些等价于 React 版本里的 useRef：只在事件回调里读写，不参与响应式追踪
 	let mapboxgl: typeof import('mapbox-gl').default | null = null;
 	let map: MapboxMap | null = null;
+
+	// 用户开了「减少动态效果」时，地图直接跳到目标位置，不做飞行动画
+	const prefersReducedMotion = () =>
+		typeof window !== 'undefined' &&
+		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 	let marker: MapboxMarker | null = null;
 	let isMapLoaded = false;
 
@@ -122,7 +127,8 @@
 
 				mapInstance.flyTo({
 					center: target,
-					zoom: 13
+					zoom: 13,
+					duration: prefersReducedMotion() ? 0 : undefined
 				});
 
 				if (!marker && mapboxgl) {
@@ -174,7 +180,8 @@
 		// 先移动地图
 		map.flyTo({
 			center: target,
-			zoom: 13
+			zoom: 13,
+			duration: prefersReducedMotion() ? 0 : undefined
 		});
 
 		// 创建或更新标记

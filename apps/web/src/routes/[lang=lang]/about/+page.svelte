@@ -80,7 +80,7 @@
 					href={social.href}
 					target="_blank"
 					rel="noreferrer"
-					class="font-medium text-gray-700 group-hover:text-violet-700"
+					class="font-medium text-zinc-700 group-hover:text-violet-700"
 				>
 					{social.name}
 				</a>

@@ -47,10 +47,10 @@
 <div>
 	<div class="relative mt-10">
 		<div aria-hidden="true" class="absolute inset-0 flex items-center">
-			<div class="w-full border-t border-gray-200"></div>
+			<div class="w-full border-t border-zinc-200"></div>
 		</div>
 		<div class="relative flex justify-center text-sm font-medium leading-6">
-			<span class="bg-white px-6 text-gray-900">{label.oauth}</span>
+			<span class="bg-white px-6 text-zinc-900">{label.oauth}</span>
 		</div>
 	</div>
 	<div class="mt-6">
@@ -58,7 +58,7 @@
 			type="button"
 			onclick={signInWithGithub}
 			disabled={submitting}
-			class="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent disabled:cursor-not-allowed disabled:opacity-70"
+			class="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:cursor-not-allowed disabled:opacity-70"
 		>
 			<svg fill="currentColor" viewBox="0 0 20 20" aria-hidden="true" class="h-5 w-5 fill-[#24292F]">
 				<path
@@ -70,9 +70,12 @@
 			<span class="text-sm font-semibold leading-6">GitHub</span>
 		</button>
 	</div>
-	{#if error}
-		<div class="mt-6">
-			<p class="text-sm text-red-600">{error}</p>
-		</div>
-	{/if}
+	<!-- OAuth 失败只会就地渲染一段文字，容器常驻并带 role="alert"，读屏才能感知 -->
+	<div role="alert">
+		{#if error}
+			<div class="mt-6">
+				<p class="text-sm text-red-600">{error}</p>
+			</div>
+		{/if}
+	</div>
 </div>

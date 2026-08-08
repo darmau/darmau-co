@@ -6,15 +6,15 @@
 	export type ReactionCounts = Record<ReactionType, number>;
 	export type ReactionSummary = Partial<ReactionCounts>;
 
-	type ReactionConfig = { key: ReactionType; emoji: string; label: string };
+	type ReactionConfig = { key: ReactionType; emoji: string };
 
 	const REACTION_CONFIG: ReactionConfig[] = [
-		{ key: 'like', emoji: '👍', label: 'Like' },
-		{ key: 'love', emoji: '❤️', label: 'Love' },
-		{ key: 'haha', emoji: '😂', label: 'Haha' },
-		{ key: 'wow', emoji: '😮', label: 'Wow' },
-		{ key: 'sad', emoji: '😢', label: 'Sad' },
-		{ key: 'think', emoji: '🤔', label: 'Think' }
+		{ key: 'like', emoji: '👍' },
+		{ key: 'love', emoji: '❤️' },
+		{ key: 'haha', emoji: '😂' },
+		{ key: 'wow', emoji: '😮' },
+		{ key: 'sad', emoji: '😢' },
+		{ key: 'think', emoji: '🤔' }
 	];
 
 	const STORAGE_PREFIX = 'reaction_';
@@ -76,14 +76,13 @@
 	import { untrack } from 'svelte';
 	import { page } from '$app/state';
 	import { getSiteContext } from '$lib/context';
+	import UIText from '$lib/locales/ui';
+	import getLanguageLabel from '$lib/utils/getLanguageLabel';
 
 	let {
 		contentType,
 		contentId,
 		reactions = null,
-		// 原 React 版把 className 解构出来后从没用过（外面传的 "mt-10" 一直没生效），
-		// 这里照抄这个行为：接收但不应用，免得改变现有排版。
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		class: className = ''
 	}: {
 		contentType: 'article' | 'photo' | 'thought';
@@ -93,6 +92,7 @@
 	} = $props();
 
 	const ctx = getSiteContext();
+	const uiLabel = $derived(getLanguageLabel(UIText, ctx.lang));
 	const pathname = $derived(page.url.pathname);
 
 	// 原 useState 的惰性初始值：只取 props 的首次快照，后续由下面的 $effect 同步
@@ -159,7 +159,7 @@
 
 		if (rpcError) {
 			console.error(rpcError);
-			error = '提交失败，请稍后重试。';
+			error = uiLabel.submit_failed;
 			pending = null;
 			return;
 		}
@@ -173,13 +173,15 @@
 	}
 </script>
 
-<div class="my-4 rounded-xl flex flex-col gap-2">
+<div class="my-4 rounded-xl flex flex-col {className}">
 	<div class="flex flex-wrap gap-2">
 		{#each REACTION_CONFIG as { key, emoji } (key)}
 			{@const isActive = active.has(key)}
 			{@const isLoading = pending === key}
+			<!-- emoji 是 aria-hidden 的装饰，不给 aria-label 的话六个按钮的可访问名全是「· 0」 -->
 			<button
 				type="button"
+				aria-label="{uiLabel[`reaction_${key}`]}: {counts[key] ?? 0}"
 				aria-pressed={isActive}
 				disabled={isLoading}
 				onclick={() => handleReaction(key)}
@@ -194,7 +196,6 @@
 			</button>
 		{/each}
 	</div>
-	{#if error}
-		<p class="text-xs text-red-500 px-1">{error}</p>
-	{/if}
+	<!-- 容器常驻 DOM：live region 必须先存在，之后写入的文字才会被读屏播报 -->
+	<div class="px-1 text-xs text-red-600 {error ? 'mt-2' : ''}" role="alert">{error ?? ''}</div>
 </div>

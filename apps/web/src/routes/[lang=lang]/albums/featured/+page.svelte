@@ -46,7 +46,8 @@
 />
 
 <Subnav active="photography" />
-<h1 class="sr-only">Featured Photography</h1>
+<!-- 原来硬编码英文「Featured Photography」，中日文用户的读屏会用本地语音引擎念英文 -->
+<h1 class="sr-only">{label.featured_albums_title}</h1>
 <div class="w-full max-w-8xl mx-auto p-4 md:py-8 lg:mb-16">
 	<MasonryAlbum {photos} />
 </div>

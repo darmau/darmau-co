@@ -6,7 +6,8 @@
 </script>
 
 {#if comment.is_anonymous}
-	<h4 class="flex items-center font-medium text-zinc-800 mb-2 hover:text-violet-700">
+	<!-- 评论者名字只是视觉上加粗，不构成页面结构，用 h4 会往标题大纲里塞进几十条噪音 -->
+	<p class="flex items-center font-medium text-zinc-800 mb-2 hover:text-violet-700">
 		{#if comment.website}
 			<a
 				class="text-violet-700 hover:text-violet-500"
@@ -19,9 +20,9 @@
 		{:else}
 			<span>{comment.name}</span>
 		{/if}
-	</h4>
+	</p>
 {:else}
-	<h4 class="flex items-center gap-1 font-medium text-zinc-800 mb-2">
+	<p class="flex items-center gap-1 font-medium text-zinc-800 mb-2">
 		{#if comment.users && comment.users.website}
 			<a
 				class="text-violet-700 hover:text-violet-500"
@@ -37,5 +38,5 @@
 		<!-- users.role 对 anon 已不可读（2026-08-07 列级 GRANT），
 		     登录用户统一显示认证标记，不再区分管理员 -->
 		<CheckBadge class="w-4 h-4 inline-block text-violet-700" />
-	</h4>
+	</p>
 {/if}

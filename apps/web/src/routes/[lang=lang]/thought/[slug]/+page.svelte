@@ -8,6 +8,7 @@
 	import ContentContainer from '$components/ContentContainer.svelte';
 	import I18nHead from '$components/I18nHead.svelte';
 	import JsonLd from '$components/JsonLd.svelte';
+	import PageContainer from '$components/PageContainer.svelte';
 	import Reaction, { type ReactionSummary } from '$components/Reaction.svelte';
 	import ResponsiveImage from '$components/ResponsiveImage.svelte';
 	import EyeSolid from '$icons/EyeSolid.svelte';
@@ -65,6 +66,11 @@
 	const description = $derived(
 		data.thoughtData.content_text ? data.thoughtData.content_text.split(/\r?\n/).join('') : ''
 	);
+	// 详情页的 h1 原来写着「Thoughts」（和列表页对调了），读屏用户拿不到任何关于这条想法的信息。
+	// 这里用想法本身的摘要，没有正文时退回发布时间。
+	const heading = $derived(
+		description ? `${description.slice(0, 40)}${description.length > 40 ? '…' : ''}` : title
+	);
 	// 旧版登录用户评论成功时 success 是布尔 true，React 把它渲染成空；这里保持一致
 	const successMessage = $derived(typeof form?.success === 'string' ? form.success : '');
 </script>
@@ -97,16 +103,27 @@
 	path="thought/{data.thoughtData.slug}"
 />
 
-<div class="w-full max-w-6xl mx-auto p-4 md:py-8 mb-8 lg:mb-16">
+<PageContainer>
 	<Breadcrumb pages={breadcrumbPages} />
-	<h1 class="sr-only">Thoughts</h1>
+	<h1 class="sr-only">{heading}</h1>
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 		<div class="col-span-1 lg:col-span-2">
 			<ContentContainer content={data.thoughtData.content_json as unknown as Json} />
 			{#if data.thoughtImages}
 				<div class="space-y-2">
 					{#each data.thoughtImages as image (image.image.id)}
-						<ResponsiveImage image={image.image as Image} width={560} classList="rounded" />
+						<!--
+							ResponsiveImage 防 CLS 靠调用方在 classList 里传 aspect-*，
+							但想法配图比例不固定，没法用固定的 aspect-* class，
+							这里用原图宽高直接把盒子的比例定死，避免图片加载完成时页面跳动。
+						-->
+						<div style="aspect-ratio: {image.image.width} / {image.image.height}">
+							<ResponsiveImage
+								image={image.image as Image}
+								width={560}
+								classList="rounded w-full h-full"
+							/>
+						</div>
 					{/each}
 				</div>
 			{/if}
@@ -135,13 +152,18 @@
 				{replyingTo}
 				onCancelReply={handleCancelReply}
 			/>
-			<div class="flex flex-col gap-4 divide-y divide-none">
+			<!-- live region 要常驻 DOM 才会被读屏播报，所以容器无条件渲染 -->
+			<div role="alert" class="empty:hidden">
 				{#if form?.error}
-					<p class="mt-2 text-sm text-red-500">{form.error}</p>
+					<p class="mt-2 text-sm text-red-600">{form.error}</p>
 				{/if}
+			</div>
+			<div role="status" class="empty:hidden">
 				{#if form?.success}
-					<p class="mt-2 text-sm text-green-500">{successMessage}</p>
+					<p class="mt-2 text-sm text-green-700">{successMessage}</p>
 				{/if}
+			</div>
+			<div class="flex flex-col gap-4 divide-y divide-none">
 				{#each data.comments as comment (comment.id)}
 					<CommentBlock comment={comment as unknown as CommentProps} onReply={handleReply} />
 				{/each}
@@ -150,7 +172,7 @@
 				{#if data.page > 1}
 					<a
 						href="?page={data.page - 1}&limit={data.limit}#comment-editor"
-						class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+						class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 					>
 						{label.previous}
 					</a>
@@ -158,7 +180,7 @@
 				{#if data.page < data.totalPage}
 					<a
 						href="?page={data.page + 1}&limit={data.limit}#comment-editor"
-						class="ml-auto rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+						class="ml-auto rounded-md bg-white px-3 py-2 text-sm font-semibold text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 					>
 						{label.next}
 					</a>
@@ -166,4 +188,4 @@
 			</div>
 		</div>
 	</div>
-</div>
+</PageContainer>

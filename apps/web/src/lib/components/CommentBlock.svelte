@@ -33,14 +33,18 @@
 
 	{#if comment.reply_to}
 		<div class="mt-2">
-			<p class="p-4 bg-zinc-100 text-sm text text-zinc-700 mb-4">{replyQuote}</p>
+			<p class="p-4 bg-zinc-100 text-sm text-zinc-700 mb-4">{replyQuote}</p>
 		</div>
 	{/if}
 
 	<div class="my-4 text-base text-zinc-700 space-y-2">
 		<MarkdownContent content={comment.content_text} />
 	</div>
-	<button onclick={() => onReply(comment)} class="text-sm text-violet-700 hover:text-violet-500">
+	<button
+		type="button"
+		onclick={() => onReply(comment)}
+		class="text-sm text-violet-700 hover:text-violet-500"
+	>
 		{label.reply}
 	</button>
 </div>

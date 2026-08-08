@@ -5,6 +5,7 @@ export default {
     "total": "共计",
     "copy_link": "复制链接",
     "coppied": "已复制",
+    "share_to": "分享到",
   },
   "en": {
     "prev_page": "Previous",
@@ -12,6 +13,7 @@ export default {
     "total": "Total",
     "copy_link": "Copy Link",
     "coppied": "Coppied",
+    "share_to": "Share on",
   },
   "jp": {
     "prev_page": "前へ",
@@ -19,5 +21,6 @@ export default {
     "total": "合計",
     "copy_link": "リンクをコピー",
     "coppied": "コピーしました",
+    "share_to": "シェア:",
   }
 }

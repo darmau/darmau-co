@@ -3,6 +3,7 @@
 	import CopyIcon from '$icons/Copy.svelte';
 	import getLanguageLabel from '$utils/getLanguageLabel';
 	import Text from '$locales/utils';
+	import UIText from '$locales/ui';
 	import { trackCopyLink, trackShareX, type ContentType } from '$utils/zaraz';
 
 	interface ShareButtonProps {
@@ -15,6 +16,7 @@
 	let { url, title, lang, contentType }: ShareButtonProps = $props();
 
 	const label = $derived(getLanguageLabel(Text, lang));
+	const uiLabel = $derived(getLanguageLabel(UIText, lang));
 
 	let showMessage = $state(false);
 
@@ -44,23 +46,27 @@
 
 <div class="flex justify-start gap-3 items-center">
 	<button
+		type="button"
 		onclick={copyToClipboard}
-		class="group flex gap-2 border border-gray-200 rounded-md shadow-sm p-2 justify-between"
+		class="group flex gap-2 border border-zinc-200 rounded-md shadow-sm p-2 justify-between focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 	>
 		<CopyIcon class="h-5 w-5 group-hover:text-zinc-900" />
 		<span
-			class="text-sm group-hover:font-medium {showMessage ? 'text-green-600' : 'text-zinc-700'}"
+			class="text-sm group-hover:font-medium {showMessage ? 'text-green-700' : 'text-zinc-700'}"
 		>
 			{showMessage ? label.coppied : label.copy_link}
 		</span>
 	</button>
+	<!-- 复制结果原本只有视觉反馈，读屏用户按下按钮后毫无提示 -->
+	<span role="status" class="sr-only">{showMessage ? label.coppied : ''}</span>
 	<a
-		class="twitter-share-button border border-gray-200 rounded-md shadow-sm p-2 group"
+		class="twitter-share-button border border-zinc-200 rounded-md shadow-sm p-2 group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
 		href={twitterUrl}
 		target="_blank"
 		rel="noopener noreferrer"
 		onclick={handleShareX}
 	>
-		<TwitterIcon class="h-5 w-5 text-zinc-600 group-hover:text-zinc-900" />
+		<span class="sr-only">{label.share_to} X {uiLabel.opens_in_new_window}</span>
+		<TwitterIcon aria-hidden="true" class="h-5 w-5 text-zinc-600 group-hover:text-zinc-900" />
 	</a>
 </div>
