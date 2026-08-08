@@ -4,12 +4,12 @@
 	import TwitterIcon from '$icons/Twitter.svelte';
 	import YoutubeIcon from '$icons/Youtube.svelte';
 	import I18nHead from '$components/I18nHead.svelte';
+	import JsonLd from '$components/JsonLd.svelte';
 	import ResponsiveImage from '$components/ResponsiveImage.svelte';
 	import Subnav from '$components/Subnav.svelte';
 	import HomepageText from '$lib/locales/homepage';
 	import type { Image } from '$lib/types/Image';
 	import getLanguageLabel from '$lib/utils/getLanguageLabel';
-	import { serializeStructuredData } from '$lib/utils/structuredData';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -41,8 +41,9 @@
 	<meta property="twitter:description" content={label.about_description} />
 	<meta property="twitter:card" content="summary_large_image" />
 	<meta property="twitter:creator" content="@darmau8964" />
-	{@html `<script type="application/ld+json">${serializeStructuredData(data.structuredData)}</script>`}
 </svelte:head>
+
+<JsonLd data={data.structuredData} />
 
 <I18nHead baseUrl={data.baseUrl} {lang} availableLangs={data.availableLangs} path="about" />
 

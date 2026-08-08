@@ -5,12 +5,10 @@
 	import Banners from '$components/Banners.svelte';
 	import Footer from '$components/Footer.svelte';
 	import Navbar from '$components/Navbar.svelte';
+	import JsonLd from '$components/JsonLd.svelte';
 	import PendingNavigation from '$components/PendingNavigation.svelte';
 	import { setSiteContext } from '$lib/context';
-	import {
-		generateWebsiteStructuredData,
-		serializeStructuredData
-	} from '$lib/utils/structuredData';
+	import { generateWebsiteStructuredData } from '$lib/utils/structuredData';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -20,14 +18,12 @@
 	const siteName = $derived(SITE_NAMES[data.lang] ?? '积薪');
 
 	const websiteJsonLd = $derived(
-		serializeStructuredData(
-			generateWebsiteStructuredData({
-				baseUrl: data.baseUrl,
-				name: siteName,
-				alternateName: ['积薪', 'Firewood', '積薪', 'darmau.co'].filter((n) => n !== siteName),
-				inLanguage: data.lang
-			})
-		)
+		generateWebsiteStructuredData({
+			baseUrl: data.baseUrl,
+			name: siteName,
+			alternateName: ['积薪', 'Firewood', '積薪', 'darmau.co'].filter((n) => n !== siteName),
+			inLanguage: data.lang
+		})
 	);
 
 	// 用 getter 而不是快照：导航切换语言/页面后 data 会变，context 消费方要跟着更新
@@ -63,8 +59,9 @@
 <svelte:head>
 	<meta property="og:site_name" content={siteName} />
 	<meta name="application-name" content={siteName} />
-	{@html `<script type="application/ld+json">${websiteJsonLd}</script>`}
 </svelte:head>
+
+<JsonLd data={websiteJsonLd} />
 
 <Navbar lang={data.lang} items={data.navbarItems} />
 <PendingNavigation />
