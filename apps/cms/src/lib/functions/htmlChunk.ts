@@ -38,4 +38,3 @@ export const splitHtmlByTopLevelNodes = (html: string): string[] => {
 
 	return chunks.length > 0 ? chunks : [html];
 };
-

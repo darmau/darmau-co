@@ -6,4 +6,3 @@
 </script>
 
 <AI {data} />
-

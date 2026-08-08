@@ -20,7 +20,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const rows = (rowsResult ?? []) as ConfigRow[];
 	const configMap = new Map(rows.map(({ key, value }) => [key, value ?? '']));
-	
+
 	const apiConfig: Record<string, string> = {};
 	KEYS.forEach((key) => {
 		apiConfig[key] = configMap.get(key) ?? '';
@@ -30,4 +30,3 @@ export const load: PageServerLoad = async ({ locals }) => {
 		apiConfig
 	};
 };
-

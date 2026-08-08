@@ -37,12 +37,12 @@ Shinano CMS is an internal SvelteKit admin console for managing multilingual art
 
    Create `.env.local` (SvelteKit loads it automatically) and provide the secrets listed below. The `PUBLIC_` prefix marks values that are safe to expose to the browser; everything else stays private.
 
-   | Variable                   | Scope  | Purpose                                                      |
-   | -------------------------- | ------ | ------------------------------------------------------------ |
-   | `PUBLIC_SUPABASE_URL`      | public | Supabase project URL.                                        |
-   | `PUBLIC_SUPABASE_ANON_KEY` | public | Supabase anon key used by the browser client.                |
-   | `URL_PREFIX`               | server | Base URL used when rendering media links inside the admin.   |
-   | `BASE_URL`                 | server | Public-facing site URL used when linking out from comments.  |
+   | Variable                   | Scope  | Purpose                                                     |
+   | -------------------------- | ------ | ----------------------------------------------------------- |
+   | `PUBLIC_SUPABASE_URL`      | public | Supabase project URL.                                       |
+   | `PUBLIC_SUPABASE_ANON_KEY` | public | Supabase anon key used by the browser client.               |
+   | `URL_PREFIX`               | server | Base URL used when rendering media links inside the admin.  |
+   | `BASE_URL`                 | server | Public-facing site URL used when linking out from comments. |
 
 3. **Database**
    - Provision a Supabase project, then link it and apply the migrations:
