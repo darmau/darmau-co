@@ -2,13 +2,23 @@ packages:
   - "apps/*"
   - "packages/*"
 
-onlyBuiltDependencies:
-  - esbuild
-  - sharp
-  - supabase
-  - unrs-resolver
-  - workerd
+# pnpm 11 用 allowBuilds 取代了 onlyBuiltDependencies / ignoredBuiltDependencies
+allowBuilds:
+  esbuild: true
+  sharp: true
+  supabase: true
+  unrs-resolver: true
+  workerd: true
+  "@tailwindcss/oxide": false
+  svelte-preprocess: false
 
-ignoredBuiltDependencies:
-  - "@tailwindcss/oxide"
-  - svelte-preprocess
+minimumReleaseAgeExclude:
+  - '@supabase/cli-darwin-arm64@2.112.0'
+  - '@supabase/cli-darwin-x64@2.112.0'
+  - '@supabase/cli-linux-arm64-musl@2.112.0'
+  - '@supabase/cli-linux-arm64@2.112.0'
+  - '@supabase/cli-linux-x64-musl@2.112.0'
+  - '@supabase/cli-linux-x64@2.112.0'
+  - '@supabase/cli-windows-arm64@2.112.0'
+  - '@supabase/cli-windows-x64@2.112.0'
+  - supabase@2.112.0

@@ -228,8 +228,7 @@
 			rows="3"
 			placeholder="例如：黄金时刻的山脉日出，温暖色调，高细节摄影风格"
 			bind:value={prompt}
-			disabled={isGenerating || isUploading}
-		></textarea>
+			disabled={isGenerating || isUploading}></textarea>
 		<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
 			<label class="flex flex-col gap-1 text-sm text-gray-700">
 				<span class="font-medium text-gray-900">尺寸</span>
@@ -320,8 +319,7 @@
 						rows="2"
 						bind:value={altText}
 						placeholder="用于无障碍阅读的图片描述"
-						disabled={isUploading}
-					></textarea>
+						disabled={isUploading}></textarea>
 				</div>
 				<div>
 					<label

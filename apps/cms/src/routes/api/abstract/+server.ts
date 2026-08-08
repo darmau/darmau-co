@@ -8,10 +8,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		error(400, 'Content is required');
 	}
 
-	const configMap = await loadAiConfigMap(locals.supabase, [
-		'prompt_SEO',
-		'model_ABSTRACT'
-	]);
+	const configMap = await loadAiConfigMap(locals.supabase, ['prompt_SEO', 'model_ABSTRACT']);
 	const prompt = configMap.get('prompt_SEO');
 	const model = configMap.get('model_ABSTRACT') ?? 'gpt-5.1';
 

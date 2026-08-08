@@ -150,8 +150,7 @@
 		<textarea
 			bind:value={bookContent.comment}
 			class="w-full h-64 p-4 border border-gray-300 rounded-md shadow-sm focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm"
-			placeholder="在这里输入内容"
-		></textarea>
+			placeholder="在这里输入内容"></textarea>
 
 		<!--日期-->
 		<input

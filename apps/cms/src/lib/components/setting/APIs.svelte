@@ -115,9 +115,7 @@
 					bind:value={API.config_MAPBOX}
 					class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
 				/>
-				<p class="mt-2 text-sm text-gray-500">
-					用于查找图片的拍摄地点
-				</p>
+				<p class="mt-2 text-sm text-gray-500">用于查找图片的拍摄地点</p>
 			</div>
 			<div>
 				<label for="amap" class="block text-sm font-medium leading-6 text-gray-900">
@@ -130,9 +128,7 @@
 					bind:value={API.config_AMAP}
 					class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
 				/>
-				<p class="mt-2 text-sm text-gray-500">
-					如果你的图片在中国拍摄，建议使用高德地图 API
-				</p>
+				<p class="mt-2 text-sm text-gray-500">如果你的图片在中国拍摄，建议使用高德地图 API</p>
 			</div>
 		</div>
 		<div class="border-b border-gray-900/10 pb-8">
@@ -144,9 +140,7 @@
 				bind:value={API.config_BARK_SERVER}
 				class="font-mono text-gray-900 ring-gray-300 placeholder:text-gray-400 focus:ring-indigo-600 block w-full rounded-md border-0 py-1.5 px-2 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
 			/>
-			<p class="mt-2 text-sm text-gray-500">
-				用于给管理员发送通知
-			</p>
+			<p class="mt-2 text-sm text-gray-500">用于给管理员发送通知</p>
 		</div>
 		<button
 			type="submit"

@@ -18,4 +18,3 @@ export const load: PageServerLoad = async ({ locals }) => {
 		languages: languages ?? []
 	};
 };
-

@@ -4,4 +4,3 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = () => {
 	throw redirect(302, '/admin/setting/languages');
 };
-

@@ -70,9 +70,7 @@
 <div class="max-w-96 mx-auto">
 	<div class="space-y-6">
 		<div>
-			<label for="title" class="block text-sm font-medium leading-6 text-gray-900"
-				>标题</label
-			>
+			<label for="title" class="block text-sm font-medium leading-6 text-gray-900">标题</label>
 			<div class="mt-2">
 				<input
 					value={categoryData.title}
@@ -88,9 +86,7 @@
 			</div>
 		</div>
 		<div>
-			<label for="type" class="block text-sm font-medium leading-6 text-gray-900"
-				>类型</label
-			>
+			<label for="type" class="block text-sm font-medium leading-6 text-gray-900">类型</label>
 			<select
 				value={categoryData.type}
 				on:change={(event: Event) => {
@@ -124,8 +120,7 @@
 			<p class="mt-2 text-sm text-gray-500">注意在同一个语言下和类型下不得重复</p>
 		</div>
 		<div>
-			<label for="description" class="block text-sm font-medium leading-6 text-gray-900"
-				>描述</label
+			<label for="description" class="block text-sm font-medium leading-6 text-gray-900">描述</label
 			>
 			<div class="mt-2">
 				<textarea
@@ -142,9 +137,7 @@
 			</div>
 		</div>
 		<div>
-			<label for="language" class="block text-sm font-medium leading-6 text-gray-900"
-				>语言</label
-			>
+			<label for="language" class="block text-sm font-medium leading-6 text-gray-900">语言</label>
 			<select
 				value={categoryData.lang}
 				on:change={(event: Event) => {

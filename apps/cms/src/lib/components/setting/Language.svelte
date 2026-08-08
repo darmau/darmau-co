@@ -15,7 +15,7 @@
 	// 更换默认语言
 	const setDefaultLanguage = async (lang: string) => {
 		if (!supabase) return;
-		
+
 		const { error } = await supabase.from('language').update({ is_default: true }).eq('lang', lang);
 		if (error) {
 			console.error(error);
@@ -25,7 +25,7 @@
 			});
 			return;
 		}
-		
+
 		await invalidateAll();
 		toastStore.trigger({
 			message: '默认语言已切换',
@@ -37,7 +37,7 @@
 	// 添加语言
 	const addLanguage = async (lang: string, locale: string) => {
 		if (!supabase) return;
-		
+
 		const { error: dataError } = await supabase.from('language').insert({ lang, locale }).select();
 		if (dataError) {
 			console.error(dataError);
@@ -48,7 +48,7 @@
 			});
 			return;
 		}
-		
+
 		await invalidateAll();
 		toastStore.trigger({
 			message: '语言已添加',
@@ -60,7 +60,7 @@
 	// 删除语言
 	const deleteLanguage = async (lang: string) => {
 		if (!supabase) return;
-		
+
 		const { error: deleteError } = await supabase.from('language').delete().eq('lang', lang);
 		if (deleteError) {
 			console.error(deleteError);
@@ -71,7 +71,7 @@
 			});
 			return;
 		}
-		
+
 		await invalidateAll();
 		toastStore.trigger({
 			message: '语言已删除',

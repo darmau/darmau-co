@@ -5,13 +5,13 @@
 
 CMS 侧的迁移文件在 `shinano-cms/supabase/migrations/`，共五个：
 
-| 文件                                       | 内容                     |
-| ------------------------------------------ | ------------------------ |
-| `20260807000000_p0_security_fixes.sql`     | RLS / 列权限收紧（**前台影响最大**） |
-| `20260807010000_p1_data_integrity.sql`     | NOT NULL、触发器修复     |
-| `20260807020000_p1_indexes.sql`            | 索引调整                 |
-| `20260807030000_p1_types_and_cleanup.sql`  | 类型修正、函数修复       |
-| `20260807040000_p2_save_photo_atomically.sql` | 后台专用 RPC（前台无关） |
+| 文件                                          | 内容                                 |
+| --------------------------------------------- | ------------------------------------ |
+| `20260807000000_p0_security_fixes.sql`        | RLS / 列权限收紧（**前台影响最大**） |
+| `20260807010000_p1_data_integrity.sql`        | NOT NULL、触发器修复                 |
+| `20260807020000_p1_indexes.sql`               | 索引调整                             |
+| `20260807030000_p1_types_and_cleanup.sql`     | 类型修正、函数修复                   |
+| `20260807040000_p2_save_photo_atomically.sql` | 后台专用 RPC（前台无关）             |
 
 ---
 
@@ -32,18 +32,16 @@ anon **读不到**的列：
 
 ```ts
 // ❌ 会 42501
-supabase.from('comment').select('*')
-supabase.from('comment').select('*, users(*)')
+supabase.from('comment').select('*');
+supabase.from('comment').select('*, users(*)');
 
 // ✅
-supabase
-  .from('comment')
-  .select(`
+supabase.from('comment').select(`
     id, name, website, content_html, content_text, content_json,
     created_at, reply_to, is_anonymous, is_public, is_blocked,
     to_article, to_photo, to_thought,
     users ( id, name, website, created_at )
-  `)
+  `);
 ```
 
 > 注意：这是**列级 GRANT**，不是 RLS。它对 anon key 生效。
@@ -74,19 +72,19 @@ RLS 把它过滤掉了；而且默认回读是 `*`，又会撞上第 1 条的列
 
 ```ts
 // ❌ 会抛 PGRST116（0 rows）或 42501
-const { data } = await supabase.from('comment').insert(payload).select().single()
+const { data } = await supabase.from('comment').insert(payload).select().single();
 
 // ✅
-const { error } = await supabase.from('comment').insert(payload)
+const { error } = await supabase.from('comment').insert(payload);
 ```
 
 **（b）anon 的 INSERT 现在有 WITH CHECK 约束**，不满足会被拒绝：
 
-| 要求                                | 说明                              |
-| ----------------------------------- | --------------------------------- |
-| `user_id` 必须为 `null`             | 匿名评论不得冒充已注册用户        |
-| `is_blocked` 必须为 `false` 或不传  | 不能自设绕过屏蔽                  |
-| `toxic_score` 必须为 `null` 或不传  | 这个值只能由服务端写              |
+| 要求                                  | 说明                                       |
+| ------------------------------------- | ------------------------------------------ |
+| `user_id` 必须为 `null`               | 匿名评论不得冒充已注册用户                 |
+| `is_blocked` 必须为 `false` 或不传    | 不能自设绕过屏蔽                           |
+| `toxic_score` 必须为 `null` 或不传    | 这个值只能由服务端写                       |
 | `content_text` 非空且 **≤ 5000 字符** | 前台表单要加同样的长度校验，先在客户端拦下 |
 
 同时表上原有的 CHECK 仍然生效：`is_anonymous = true` 时必须有 `name` 和 `email`。
@@ -138,6 +136,7 @@ CMS 的 `hooks.server.ts` 现在对 `/admin/**` 和所有非 auth 的 `/api/**` 
 ### 8. `updated_at` 由数据库控制，且访客行为不再污染它
 
 `article` / `photo` 加了 `touch_updated_at` 触发器：
+
 - 客户端传的 `updated_at` 会被覆盖（前台本来也不该写）。
 - **`page_view` 自增和 `reactions` 变化不会再改 `updated_at`**。
   以前一个访客点个表情，三年前的文章就会被顶到"最近更新"的最前面。
@@ -194,15 +193,15 @@ pnpm exec supabase gen types typescript --project-id <project-ref> > src/lib/typ
 
 生成后会看到这些列**从可空变成了非空**（P1 迁移加的 NOT NULL）：
 
-| 表 | 变成 NOT NULL 的列 |
-| --- | --- |
-| `article` | `title`、`slug`、`lang`、`category`、`updated_at` |
-| `photo` | `title`、`slug`、`lang`、`category`、`updated_at` |
-| `category` | `lang`、`slug`、`title`、`type` |
-| `language` | `lang`、`locale`、`is_default`（默认 `false`） |
-| `thought` | `slug` |
-| `book` | `title` |
-| `message` | `contact_type`（默认 `'email'`） |
+| 表         | 变成 NOT NULL 的列                                |
+| ---------- | ------------------------------------------------- |
+| `article`  | `title`、`slug`、`lang`、`category`、`updated_at` |
+| `photo`    | `title`、`slug`、`lang`、`category`、`updated_at` |
+| `category` | `lang`、`slug`、`title`、`type`                   |
+| `language` | `lang`、`locale`、`is_default`（默认 `false`）    |
+| `thought`  | `slug`                                            |
+| `book`     | `title`                                           |
+| `message`  | `contact_type`（默认 `'email'`）                  |
 
 对前台是好事：可以删掉一堆 `title ?? ''`、`if (!slug) return` 之类的防御代码。
 
