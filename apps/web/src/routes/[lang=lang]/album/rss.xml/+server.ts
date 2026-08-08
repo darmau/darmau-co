@@ -3,7 +3,7 @@ import getLanguageLabel from "$lib/utils/getLanguageLabel";
 import HomepageText from '$lib/locales/homepage';
 import type {FeedEnclosure, RichRssEntry} from "$lib/types/rss";
 
-export type RssEntry = RichRssEntry;
+type RssEntry = RichRssEntry;
 
 type AlbumImageAsset = {
   order: number;
@@ -14,7 +14,7 @@ type AlbumImageAsset = {
   caption: string | null;
 };
 
-export function generateRss({description, entries, link, title, language}: {
+function generateRss({description, entries, link, title, language}: {
   title: string;
   language: string;
   description: string;

@@ -3,7 +3,7 @@ import getLanguageLabel from "$lib/utils/getLanguageLabel";
 import HomepageText from '$lib/locales/homepage';
 import getTime from "$lib/utils/getTime";
 
-export type RssEntry = {
+type RssEntry = {
   title: string | null;
   link: string;
   description: string | null;
@@ -12,7 +12,7 @@ export type RssEntry = {
   guid: number;
 };
 
-export function generateRss({description, entries, link, title, language}: {
+function generateRss({description, entries, link, title, language}: {
   title: string;
   language: string;
   description: string;

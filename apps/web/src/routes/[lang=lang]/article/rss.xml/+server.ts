@@ -223,9 +223,9 @@ const getStyleAttr = (tag: string): string => {
   return style ? ` style="${style}"` : "";
 };
 
-export type RssEntry = RichRssEntry;
+type RssEntry = RichRssEntry;
 
-export function generateRss({description, entries, link, title, language}: {
+function generateRss({description, entries, link, title, language}: {
   title: string;
   language: string;
   description: string;
