@@ -1,18 +1,10 @@
-import { reactRouter } from "@react-router/dev/vite";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { cloudflareDevProxy } from "@react-router/dev/vite/cloudflare";
+import { sveltekit } from '@sveltejs/kit/vite';
+import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [
-    cloudflareDevProxy(),
-    reactRouter(),
-    tsconfigPaths(),
-  ],
-  ssr: {
-    resolve: {
-      conditions: ["workerd", "worker", "browser"],
-      externalConditions: ["workerd", "worker", "browser"],
-    },
-  },
+  plugins: [tailwindcss(), sveltekit()],
+  test: {
+    include: ['src/**/*.{test,spec}.{js,ts}']
+  }
 });
