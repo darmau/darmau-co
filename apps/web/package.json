@@ -13,7 +13,6 @@
     "preview": "vite preview",
     "start": "wrangler dev",
     "test": "vitest run --passWithNoTests",
-    "test:integration": "playwright test",
     "test:unit": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "typegen": "wrangler types"
