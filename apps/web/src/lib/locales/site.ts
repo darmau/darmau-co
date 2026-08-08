@@ -20,7 +20,7 @@ const content = {
     "structure_2_title": "管理后台：",
     "structure_2_desc": "使用SvelteKit开发，部署在Cloudflare。",
     "structure_3_title": "本站：",
-    "structure_3_desc": "使用Remix开发，全站SSR，部署在Cloudflare。",
+    "structure_3_desc": "使用SvelteKit开发，全站SSR，部署在Cloudflare。",
     "structure_4_title": "边缘函数：",
     "structure_4_desc": "一个Cloudflare Workers负责处理图片上传、AI调用等第三方API调用任务，提高请求成功率。",
     "statement": "虽然CMS和本站均在GitHub开源，但目前并没有做好当成成熟产品对外开放的准备。本站部署和配置相对复杂，没有前后端技术背景的不建议尝试。"
@@ -46,7 +46,7 @@ const content = {
     "structure_2_title": "Admin Panel: ",
     "structure_2_desc": "Developed using SvelteKit and deployed on Cloudflare.",
     "structure_3_title": "This Site: ",
-    "structure_3_desc": "Developed using Remix, full-site SSR, and deployed on Cloudflare.",
+    "structure_3_desc": "Developed using SvelteKit, full-site SSR, and deployed on Cloudflare.",
     "structure_4_title": "Edge Functions: ",
     "structure_4_desc": "A Cloudflare Workers is responsible for handling tasks such as image uploads, AI calls, and other third-party API calls to improve request success rates.",
     "statement": "Although the CMS and this site are open source on GitHub, there is currently no preparation to make them publicly available as mature products. The deployment and configuration of this site are relatively complex, and it is not recommended to try without a technical background in front-end and back end."
@@ -72,7 +72,7 @@ const content = {
     "structure_2_title": "管理画面：",
     "structure_2_desc": "SvelteKitを使用して開発し、Cloudflareにデプロイされています。",
     "structure_3_title": "このサイト：",
-    "structure_3_desc": "Remixを使用して開発され、フルサイトSSRで、Cloudflareにデプロイされています。",
+    "structure_3_desc": "SvelteKitを使用して開発され、フルサイトSSRで、Cloudflareにデプロイされています。",
     "structure_4_title": "エッジ関数：",
     "structure_4_desc": "Cloudflare Workersは、画像のアップロード、AIの呼び出し、その他のサードパーティAPIの呼び出しなどのタスクを処理するために責任を持ち、リクエストの成功率を向上させます。",
     "statement": "CMSとこのサイトはGitHubでオープンソースになっていますが、現在は成熟した製品として外部に公開する準備が整っていません。このサイトのデプロイと設定は比較的複雑であり、フロントエンドとバックエンドの技術的背景がない場合は試すことをお勧めしません。"

@@ -241,7 +241,7 @@ function generateRss({description, entries, link, title, language}: {
         <language>${language}</language>
         <ttl>60</ttl>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
-        <generator>Shinano Remix</generator>
+        <generator>Shinano Web</generator>
         <image>
           <title>积薪 - 文章</title>
           <url>https://img.darmau.co/cdn-cgi/image/format=jpeg,width=720/a2b148a3-5799-4be0-a8d4-907f9355f20f</url>

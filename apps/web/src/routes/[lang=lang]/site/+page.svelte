@@ -4,7 +4,6 @@
 	import Cloudflare from '$icons/Cloudflare.svg';
 	import Supabase from '$icons/Supabase.svg';
 	import SvelteKit from '$icons/Svelte.svg';
-	import Remix from '$icons/Remix.svg';
 	import Tiptap from '$icons/Tiptap.svg';
 	import OpenAI from '$icons/Openai.svg';
 	import LanguageIcon from '$icons/Language.svelte';
@@ -78,7 +77,6 @@
 			<img src={Cloudflare} alt="Cloudflare" class="h-36" />
 			<img src={Supabase} alt="Supabase" class="h-36" />
 			<img src={SvelteKit} alt="SvelteKit" class="h-36" />
-			<img src={Remix} alt="Remix" class="h-36" />
 			<img src={Tiptap} alt="Tiptap" class="h-36" />
 			<img src={OpenAI} alt="OpenAI" class="h-36" />
 		</div>

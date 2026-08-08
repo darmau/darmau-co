@@ -1,5 +1,6 @@
 <!doctype html>
-<!-- %lang% 由 hooks.server.ts 的 transformPageChunk 按当前路径的语言段替换 -->
+<!-- 下面的 lang 占位符由 hooks.server.ts 的 transformPageChunk 按当前路径的语言段替换。
+     注意别在别处再写一遍这个 token：替换用的是 String.replace，只换第一处。 -->
 <html lang="%lang%" class="scroll-smooth">
 	<head>
 		<meta charset="utf-8" />
