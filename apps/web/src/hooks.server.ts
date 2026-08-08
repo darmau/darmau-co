@@ -3,7 +3,7 @@ import { redirect, type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import type { Session, User } from '@supabase/supabase-js';
 import type { Database } from '@darmau/database';
-import { getLang } from '$lib/utils/getLang';
+import { getLang, toBcp47 } from '$lib/utils/getLang';
 import { LOCALES } from './params/lang';
 
 // 这些一级路径存在多语言版本。不在列表里的（auth、api、unsubscribe、sitemap 等）
@@ -42,7 +42,9 @@ const language: Handle = async ({ event, resolve }) => {
 
 	// app.html 里的 <html lang="%lang%">。非内容路由（/auth/* 等）没有语言段，
 	// 用协商结果兜底，而不是把路径片段原样塞进 lang 属性。
-	const lang = isLocale(segment) ? segment : getLang(event.request);
+	const segmentLang = isLocale(segment) ? segment : getLang(event.request);
+	// 路径段 jp 不是合法语言代码，lang 属性要发 ja，和 hreflang 保持一致
+	const lang = toBcp47(segmentLang);
 
 	return resolve(event, {
 		transformPageChunk: ({ html }) => html.replace('%lang%', lang)
