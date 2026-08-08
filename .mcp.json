@@ -8,6 +8,13 @@
         "@sveltejs/mcp"
       ],
       "env": {}
+    },
+    "ESLint": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "@eslint/mcp@latest"
+      ]
     }
   }
 }
