@@ -5,6 +5,12 @@
   "compatibility_date": "2026-06-16",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "notify.darmau.co",
+      "custom_domain": true
+    }
+  ],
   "observability": {
     "enabled": true
   },

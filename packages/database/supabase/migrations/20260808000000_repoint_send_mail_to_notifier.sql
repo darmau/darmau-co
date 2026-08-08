@@ -14,8 +14,7 @@
 --
 -- ⚠️ 执行这条迁移之前，必须先在生产库上设好两个 GUC，否则触发器会静默不发信：
 --
---     alter database postgres set app.settings.notifier_url =
---       'https://shinano-notifier.<你的子域>.workers.dev';
+--     alter database postgres set app.settings.notifier_url = 'https://notify.darmau.co';
 --     alter database postgres set app.settings.notifier_secret = '<WEBHOOK_SECRET>';
 --
 --   （notifier_secret 必须和 Worker 上 `wrangler secret put WEBHOOK_SECRET`
