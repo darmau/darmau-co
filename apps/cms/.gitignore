@@ -6,6 +6,9 @@ node_modules
 .env
 .env.*
 !.env.example
+# .env 是构建期用的非密钥变量，需要进仓库（见该文件头部注释）。
+# 密钥和本地覆盖写 .env.local，它仍然被上面的 .env.* 忽略。
+!.env
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .idea/*

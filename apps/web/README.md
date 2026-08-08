@@ -49,7 +49,7 @@ Even though this repository is tailored for my deployment, you can boot it for e
 pnpm install
 pnpm dev          # starts remix vite:dev on Cloudflare Pages adapter
 pnpm build        # creates the /build artifacts for Pages
-pnpm start        # runs wrangler pages dev ./build/client
+pnpm start        # runs wrangler dev（Worker 形态，走 workers/app.ts）
 ```
 
 Required environment variables live in your Cloudflare project (and `.dev.vars` when emulating locally):

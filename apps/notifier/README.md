@@ -3,7 +3,7 @@
 评论 / 用户 / 站内信发生时的通知与富化 Worker。取代原来 `Darmau/supabase-edge-function`
 仓库里的三个 Supabase Edge Function。
 
-Cloudflare Worker 名：`shinano-notifier`。
+Cloudflare Worker 名：`firewood-notify`。
 
 ## 路由
 

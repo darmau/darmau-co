@@ -18,6 +18,8 @@ build/
 .env
 .env.*
 !.env.example
+# apps/cms/.env 是构建期用的非密钥变量，需要进仓库（见文件头注释）
+!apps/cms/.env
 .dev.vars
 .dev.vars.*
 !.dev.vars.example

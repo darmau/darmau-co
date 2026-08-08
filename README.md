@@ -7,8 +7,8 @@ darmau.co 的 monorepo，用 [pnpm workspaces](https://pnpm.io/workspaces) + [Tu
 
 | 现在 | 原仓库 | 说明 |
 | --- | --- | --- |
-| `apps/web` | [Darmau/shinano-remix](https://github.com/Darmau/shinano-remix) | 前台，React Router 7 → Cloudflare Pages（项目名仍是 `shinano-remix`） |
-| `apps/cms` | [Darmau/shinano-cms](https://github.com/Darmau/shinano-cms) | 后台，SvelteKit → Cloudflare Workers（项目名仍是 `shinano-cms-worker`） |
+| `apps/web` | [Darmau/shinano-remix](https://github.com/Darmau/shinano-remix) | 前台，React Router 7 → Cloudflare Workers（Worker 名 `firewood-web`） |
+| `apps/cms` | [Darmau/shinano-cms](https://github.com/Darmau/shinano-cms) | 后台，SvelteKit → Cloudflare Workers（Worker 名 `firewood-cms`） |
 | `apps/minimalist` | [darmau/minimalist](https://github.com/darmau/minimalist) | Astro 前台重写，进行中 |
 
 三个旧仓库保留作归档，不再更新。
@@ -17,10 +17,10 @@ darmau.co 的 monorepo，用 [pnpm workspaces](https://pnpm.io/workspaces) + [Tu
 
 ```
 apps/
-  web/          前台（React Router 7 + Cloudflare Pages，项目名 shinano-remix）
-  cms/          后台（SvelteKit + Cloudflare Workers，项目名 shinano-cms-worker）
+  web/          前台（React Router 7 + Cloudflare Workers，Worker 名 firewood-web）
+  cms/          后台（SvelteKit + Cloudflare Workers，Worker 名 firewood-cms）
   minimalist/   Astro 前台实验
-  notifier/     通知 Worker（项目名 shinano-notifier），取代原来的 Supabase Edge Function
+  notifier/     通知 Worker（Worker 名 firewood-notify），取代原来的 Supabase Edge Function
 packages/
   database/     @darmau/database —— Supabase 迁移、config.toml、以及生成的 Database 类型
   shared/       @darmau/shared —— 跨 app 共用的小工具（目前是退订 token）

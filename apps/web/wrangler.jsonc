@@ -1,26 +1,22 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "firewood-web",
-  "compatibility_date": "2026-06-16",
-  "pages_build_output_dir": "./build/client",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-11-07",
+  "compatibility_flags": ["nodejs_compat"],
+  // 静态资源优先命中 build/client；命不中的请求才交给上面的 Worker 做 SSR
+  "assets": {
+    "directory": "./build/client",
+    "binding": "ASSETS"
+  },
   "ai": {
     "binding": "AI",
     "remote": true
   },
-  "env": {
-    "preview": {
-      "name": "firewood-web-preview",
-      "ai": {
-        "binding": "AI",
-        "remote": true
-      }
-    },
-    "production": {
-      "name": "firewood-web",
-      "ai": {
-        "binding": "AI",
-        "remote": true
-      }
-    }
+  "observability": {
+    "enabled": true
   }
+  // 运行时变量全部走 `wrangler secret put`（BASE_URL、IMG_PREFIX、SUPABASE_URL、
+  // SUPABASE_ANON_KEY、MAPBOX_TOKEN、TURNSTILE_SITE_KEY、TURNSTILE_SECRET_KEY、
+  // UNSUBSCRIBE_KEY），本地覆盖写 .dev.vars。仓库是公开的，所以不放 vars 里。
 }
