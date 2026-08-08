@@ -33,5 +33,13 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.node }
     }
+  },
+  {
+    rules: {
+      // 这条规则要求所有站内链接走 $app/paths 的 resolve()，为的是兼容配了
+      // kit.paths.base 的部署。本站部署在域名根路径，base 是空串，
+      // 上百个普通 <a href> 全变成噪音。
+      'svelte/no-navigation-without-resolve': 'off'
+    }
   }
 );
