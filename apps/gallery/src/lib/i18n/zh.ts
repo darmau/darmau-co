@@ -1,5 +1,5 @@
 export default {
-	siteName: 'LI DAMAO',
+	siteName: 'DARMAU',
 	siteTag: 'PHOTOGRAPHY',
 	siteDescription: '李大毛的摄影作品集。以相册记录走过的地方，每张照片附完整的拍摄参数与位置。',
 	nav: { albums: '相册', map: '足迹', about: '关于' },

@@ -1,10 +1,10 @@
 import type zh from './zh';
 
 export default {
-	siteName: 'LI DAMAO',
+	siteName: 'DARMAU',
 	siteTag: 'PHOTOGRAPHY',
 	siteDescription:
-		'Photography by Li Damao. Albums from the places I have been, each frame with its full EXIF and location.',
+		'Photography by DARMAU. Albums from the places I have been, each frame with its full EXIF and location.',
 	nav: { albums: 'Albums', map: 'Map', about: 'About' },
 	langName: { zh: '中', ja: '日', en: 'EN' },
 	langLabel: { zh: '中文', ja: '日本語', en: 'English' },

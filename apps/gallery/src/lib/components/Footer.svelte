@@ -31,7 +31,7 @@
 		{/each}
 	</ul>
 
-	<p class="copyright mono">© {year} Li Damao · {t.footer.rights}</p>
+	<p class="copyright mono">© {year} DARMAU · {t.footer.rights}</p>
 </footer>
 
 <style>

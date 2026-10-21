@@ -6,7 +6,7 @@
 	const t = $derived(page.data.t);
 </script>
 
-<svelte:head><title>{page.status} — LI DAMAO</title></svelte:head>
+<svelte:head><title>{page.status} — DARMAU</title></svelte:head>
 
 {#if t}<Nav />{/if}
 

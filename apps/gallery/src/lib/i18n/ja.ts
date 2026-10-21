@@ -1,7 +1,7 @@
 import type zh from './zh';
 
 export default {
-	siteName: 'LI DAMAO',
+	siteName: 'DARMAU',
 	siteTag: 'PHOTOGRAPHY',
 	siteDescription:
 		'李大毛の写真ポートフォリオ。訪れた場所をアルバムにまとめ、各写真に撮影データと位置情報を添えています。',
