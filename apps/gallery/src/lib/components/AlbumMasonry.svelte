@@ -110,7 +110,7 @@
 	}
 
 	.meta {
-		font-size: 11px;
+		font-size: 12px;
 		letter-spacing: 0.08em;
 	}
 
@@ -131,7 +131,7 @@
 		margin-top: 10px;
 		padding-top: 10px;
 		border-top: 1px solid rgb(237 235 230 / 0.2);
-		font-size: 11px;
+		font-size: 12px;
 		color: var(--text-2);
 	}
 

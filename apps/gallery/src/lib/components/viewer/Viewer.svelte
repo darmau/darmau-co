@@ -332,7 +332,7 @@
 
 	.shortcuts {
 		padding: 16px 24px 24px;
-		font-size: 10px;
+		font-size: 12px;
 		color: var(--muted);
 	}
 

@@ -9,16 +9,17 @@
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<!-- 图片淡入依赖 JS；没有 JS 时 Picture 直接显示图片，见 Picture.svelte -->
 		<script>document.documentElement.classList.add('js');</script>
-		<!-- 带 data-async-css 的样式表先以 media=print 下载（不阻塞渲染），加载完切成 all -->
+		<!-- 带 data-async-css 的样式表（Noto Sans SC）先以 media=print 低优先级下载、不阻塞渲染；
+		     等页面主要资源加载完、浏览器空闲时才切成 all。切换后浏览器才会去下载用到的中文字体分片，
+		     这样它们不会和首屏图片抢带宽。 -->
 		<script>
-			document.addEventListener(
-				'load',
-				function (e) {
-					var el = e.target;
-					if (el.tagName === 'LINK' && el.hasAttribute('data-async-css')) el.media = 'all';
-				},
-				true
-			);
+			addEventListener('load', function () {
+				(window.requestIdleCallback || setTimeout)(function () {
+					document.querySelectorAll('link[data-async-css]').forEach(function (el) {
+						el.media = 'all';
+					});
+				});
+			});
 		</script>
 		%sveltekit.head%
 	</head>

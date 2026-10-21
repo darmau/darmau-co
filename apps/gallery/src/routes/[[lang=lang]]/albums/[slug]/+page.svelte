@@ -218,7 +218,7 @@
 	}
 
 	.lens {
-		font-size: 11px;
+		font-size: 12px;
 		color: var(--muted);
 	}
 
@@ -286,7 +286,7 @@
 	}
 
 	.next-count {
-		font-size: 11px;
+		font-size: 12px;
 		color: var(--accent);
 	}
 
