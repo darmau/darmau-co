@@ -38,7 +38,8 @@
 
 {#if view}
 	<figure class="route" aria-label={t.album.route}>
-		{#if token}<img src={src} width={W} height={H} alt="" loading="lazy" decoding="async" />{/if}
+		<!-- 不懒加载：桌面端它在首屏，而且常常是页面上最大的元素 -->
+		{#if token}<img {src} width={W} height={H} alt="" decoding="async" />{/if}
 		{#if points.length > 1}
 			<svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
 				<polyline points={points.map(({ xy }) => xy.map((n) => n.toFixed(1)).join(',')).join(' ')} />
@@ -51,7 +52,7 @@
 				href={`#photo-${photo.index}`}
 				style:left={`${(xy[0] / W) * 100}%`}
 				style:top={`${(xy[1] / H) * 100}%`}
-				aria-label={fmt(t.viewer.photoN, { n: photo.index })}>{pad(photo.index)}</a
+				aria-label={`${pad(photo.index)} · ${fmt(t.viewer.photoN, { n: photo.index })}`}>{pad(photo.index)}</a
 			>
 		{/each}
 		<!-- 静态图关掉了内置署名，按 Mapbox 条款自己补上 -->
@@ -91,9 +92,9 @@
 		position: absolute;
 		display: grid;
 		place-items: center;
-		width: 22px;
-		height: 22px;
-		margin: -11px 0 0 -11px;
+		width: 24px;
+		height: 24px;
+		margin: -12px 0 0 -12px;
 		border-radius: 50%;
 		background: var(--accent);
 		border: 1.5px solid var(--bg);

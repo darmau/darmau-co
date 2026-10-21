@@ -28,6 +28,7 @@
 <div
 	class="picture {fit} {className}"
 	class:loaded
+	class:priority
 	style:aspect-ratio={fit === 'natural' ? `${image.width} / ${image.height}` : undefined}
 	style:background-image={`url("${placeholderUrl(prefix, image.storageKey)}")`}
 >
@@ -81,6 +82,13 @@
 
 	.loaded img {
 		opacity: 1;
+	}
+
+	/* 首屏主图、查看器大图不做淡入：淡入要等 JS 水合后才把图片设为可见，
+	   手机上会让最大内容绘制（LCP）晚好几秒。占位图照样垫在下面。 */
+	.priority img {
+		opacity: 1;
+		transition: none;
 	}
 
 	/* 没有 JS 时直接显示 */

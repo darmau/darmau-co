@@ -33,7 +33,7 @@
 					hreflang={code}
 					lang={code}
 					aria-current={code === lang ? 'true' : undefined}
-					aria-label={t.langLabel[code]}
+					aria-label={`${t.langName[code]} · ${t.langLabel[code]}`}
 					data-sveltekit-preload-data="off">{t.langName[code]}</a
 				>
 			</li>
