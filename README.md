@@ -20,6 +20,7 @@ apps/
   web/          前台（React Router 7 + Cloudflare Workers，Worker 名 firewood-web）
   cms/          后台（SvelteKit + Cloudflare Workers，Worker 名 firewood-cms）
   minimalist/   Astro 前台实验
+  gallery/      独立摄影站 gallery.darmau.co（SvelteKit + Cloudflare Workers，Worker 名 firewood-gallery）
   notifier/     通知 Worker（Worker 名 firewood-notify），取代原来的 Supabase Edge Function
 packages/
   database/     @darmau/database —— Supabase 迁移、config.toml、以及生成的 Database 类型
@@ -30,6 +31,8 @@ packages/
 `packages/database` 是 schema 与类型的唯一权威来源，详见
 [packages/database/README.md](./packages/database/README.md)。
 `apps/notifier` 的部署与线上切换步骤见 [apps/notifier/README.md](./apps/notifier/README.md)。
+`apps/gallery` 读博客同一个 Supabase（只读），数据映射、新增相册和部署见
+[apps/gallery/README.md](./apps/gallery/README.md)。
 
 ## 常用命令
 
@@ -59,5 +62,6 @@ pnpm --filter @darmau/database db:types     # 重新生成共享类型
 | `apps/web/.dev.vars` | `wrangler dev` 的本地 secret，线上走 `wrangler secret put` |
 | `apps/cms/.env.local` | SvelteKit 的 `$env/static/*`，构建期注入 |
 | `apps/minimalist/.env` | Astro 构建期注入 |
+| `apps/gallery/.dev.vars` | `wrangler dev` / `vite dev` 的本地变量；线上非敏感的在 `wrangler.jsonc` 的 `vars`，密钥走 `wrangler secret put` |
 
 构建期会用到的变量已经在 `apps/*/turbo.json` 的 `env` 里声明，改动它们会正确让 turbo 缓存失效。
