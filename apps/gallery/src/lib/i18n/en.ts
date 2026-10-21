@@ -45,7 +45,7 @@ export default {
 		altitude: 'Altitude',
 		gear: 'Gear',
 		info: 'Album details',
-		route: 'Route',
+		route: 'Locations',
 		backAll: 'All albums',
 		next: 'Next album',
 		fallback: 'This album has not been translated yet. Showing the Chinese original.'

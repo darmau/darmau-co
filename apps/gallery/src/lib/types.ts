@@ -68,6 +68,8 @@ export interface AlbumSummary {
 	abstract: string | null;
 	publishedAt: string;
 	pinned: boolean;
+	/** CMS 里勾选的「精选」 */
+	featured: boolean;
 	cover: Photo;
 	photoCount: number;
 	place: Place | null;

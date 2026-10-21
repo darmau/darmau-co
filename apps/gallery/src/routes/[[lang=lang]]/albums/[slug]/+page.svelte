@@ -4,7 +4,7 @@
 	import PhotoFigure from '$lib/components/PhotoFigure.svelte';
 	import Picture from '$lib/components/Picture.svelte';
 	import Seo from '$lib/components/Seo.svelte';
-	import AlbumRouteMap from '$lib/components/maps/AlbumRouteMap.svelte';
+	import AlbumLocationMap from '$lib/components/maps/AlbumLocationMap.svelte';
 	import * as f from '$lib/format';
 	import { fmt, localize } from '$lib/i18n';
 	import { ogImageUrl } from '$lib/image';
@@ -70,7 +70,7 @@
 		</div>
 
 		<aside class="side" aria-label={t.album.info}>
-			<AlbumRouteMap photos={album.photos} token={data.mapboxToken} />
+			<AlbumLocationMap photos={album.photos} token={data.mapboxToken} />
 			<dl class="facts">
 				{#if album.place}
 					<div><dt class="label">{t.album.place}</dt><dd>{album.place.name}{album.place.region ? ` · ${album.place.region}` : ''}</dd></div>

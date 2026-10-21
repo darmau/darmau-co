@@ -45,7 +45,7 @@ export default {
 		altitude: '標高',
 		gear: '機材',
 		info: 'アルバム情報',
-		route: '撮影ルート',
+		route: '撮影地',
 		backAll: 'すべてのアルバム',
 		next: '次のアルバム',
 		fallback: 'このアルバムはまだ日本語に翻訳されていません。中国語の原文を表示しています。'

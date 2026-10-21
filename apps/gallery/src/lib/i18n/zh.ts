@@ -42,7 +42,7 @@ export default {
 		altitude: '海拔',
 		gear: '器材',
 		info: '相册信息',
-		route: '拍摄路线',
+		route: '拍摄地点',
 		backAll: '全部相册',
 		next: '下一个相册',
 		fallback: '这个相册还没有当前语言的版本，以下为中文原文。'

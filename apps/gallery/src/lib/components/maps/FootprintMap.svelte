@@ -3,12 +3,10 @@
 	import { page } from '$app/state';
 	import type { Map as MapboxMap } from 'mapbox-gl';
 	import { localize, type Lang } from '$lib/i18n';
-	import { lat, lng } from '$lib/format';
 	import { ACCENT, applyLanguage, loadMapbox, tintDarkStyle, whenVisible } from './mapbox';
 
 	interface Point {
 		slug: string;
-		title: string;
 		lat: number;
 		lng: number;
 	}
@@ -56,7 +54,7 @@
 						features: points.map((p) => ({
 							type: 'Feature',
 							geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-							properties: { slug: p.slug, label: `${p.title}\n${lat(p.lat, 2)} ${lng(p.lng, 2)}` }
+							properties: { slug: p.slug }
 						}))
 					}
 				});
@@ -73,35 +71,13 @@
 					}
 				});
 
-				// 标签自带碰撞检测，相册密集的地方放大后才逐个出现
-				map.addLayer({
-					id: 'album-labels',
-					type: 'symbol',
-					source: 'albums',
-					layout: {
-						'text-field': ['get', 'label'],
-						'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
-						'text-size': 11,
-						'text-anchor': 'left',
-						'text-offset': [0.9, 0],
-						'text-justify': 'left',
-						'text-line-height': 1.35
-					},
-					paint: {
-						'text-color': '#EDEBE6',
-						'text-halo-color': '#0C0C0B',
-						'text-halo-width': 1.2
-					}
+				// 只画点，不显示相册名；点击进入相册
+				map.on('click', 'album-dots', (e) => {
+					const slug = e.features?.[0]?.properties?.slug;
+					if (typeof slug === 'string') goto(localize(lang, `/albums/${slug}`));
 				});
-
-				for (const layer of ['album-dots', 'album-labels']) {
-					map.on('click', layer, (e) => {
-						const slug = e.features?.[0]?.properties?.slug;
-						if (typeof slug === 'string') goto(localize(lang, `/albums/${slug}`));
-					});
-					map.on('mouseenter', layer, () => (map!.getCanvas().style.cursor = 'pointer'));
-					map.on('mouseleave', layer, () => (map!.getCanvas().style.cursor = ''));
-				}
+				map.on('mouseenter', 'album-dots', () => (map!.getCanvas().style.cursor = 'pointer'));
+				map.on('mouseleave', 'album-dots', () => (map!.getCanvas().style.cursor = ''));
 			});
 		});
 

@@ -22,7 +22,7 @@ export function getSupabase(env: App.Platform['env'] | undefined): Client {
 const EXIF_SELECT = EXIF_KEYS.map((key) => `x_${key}:exif->${key}`).join(',');
 const IMAGE_SELECT = `id,alt,caption,width,height,storage_key,location,latitude,longitude,taken_at,${EXIF_SELECT}`;
 
-const ALBUM_SELECT = `id,slug,title,abstract,published_at,is_top,language!inner(lang),
+const ALBUM_SELECT = `id,slug,title,abstract,published_at,is_top,is_featured,language!inner(lang),
 	cover:image!photo_cover_fkey(${IMAGE_SELECT}),
 	photo_image(order,image(${IMAGE_SELECT}))`;
 
@@ -47,6 +47,7 @@ interface AlbumRow {
 	abstract: string | null;
 	published_at: string | null;
 	is_top: boolean | null;
+	is_featured: boolean | null;
 	content_html?: string | null;
 	language: { lang: string };
 	cover: ImageRow | null;
@@ -178,6 +179,7 @@ function toAlbum(row: AlbumRow, fallback: boolean): Album | null {
 		abstract: row.abstract?.trim() || null,
 		publishedAt: row.published_at ?? '',
 		pinned: !!row.is_top,
+		featured: !!row.is_featured,
 		cover: photos.find((p) => p.id === cover.id) ?? cover,
 		photoCount: photos.length,
 		place: mostCommonPlace(photos),
