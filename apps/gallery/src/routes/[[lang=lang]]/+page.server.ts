@@ -2,7 +2,7 @@ import { getSupabase, listAlbums } from '$lib/server/albums';
 import { PAGE_CACHE } from '$lib/server/cache';
 import type { PageServerLoad } from './$types';
 
-const HOME_LIMIT = 8;
+const HOME_LIMIT = 12;
 
 export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => {
 	const albums = await listAlbums(getSupabase(platform?.env), locals.lang);
