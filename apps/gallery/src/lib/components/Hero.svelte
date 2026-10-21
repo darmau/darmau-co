@@ -1,209 +1,202 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { getImgPrefix } from '$lib/context';
-	import * as f from '$lib/format';
-	import { fmt, localize, type Lang } from '$lib/i18n';
+	import { pad } from '$lib/format';
+	import { fmt } from '$lib/i18n';
 	import { srcset } from '$lib/image';
 	import type { AlbumSummary } from '$lib/types';
-	import Picture from './Picture.svelte';
+	import HeroSlide from './HeroSlide.svelte';
 
-	let { album }: { album: AlbumSummary } = $props();
+	// 首页主图：随机精选相册轮播，渐隐切换。
+	// 自动切换由当前指示器上的进度条动画驱动（animationend 时切下一张），
+	// 暂停就是暂停这条动画，计时和视觉永远同步。
 
-	const lang = $derived(page.data.lang as Lang);
+	let { albums }: { albums: AlbumSummary[] } = $props();
+
 	const t = $derived(page.data.t);
 	const prefix = getImgPrefix();
-	const cover = $derived(album.cover);
-	const href = $derived(localize(lang, `/albums/${album.slug}`));
-	const exifCells = $derived(
-		[
-			[t.exif.focal, f.focal(cover.exif)],
-			[t.exif.aperture, f.aperture(cover.exif.aperture)],
-			[t.exif.shutter, f.shutter(cover.exif.exposureTime)],
-			[t.exif.iso, cover.exif.iso === null ? null : String(cover.exif.iso)]
-		].filter((cell): cell is [string, string] => !!cell[1])
-	);
+	const first = $derived(albums[0]!.cover);
+
+	let current = $state(0);
+	/** 挂载后才开启；系统开了「减少动态效果」则不自动切换 */
+	let autoplay = $state(false);
+	/** 用户点了暂停 */
+	let paused = $state(false);
+	/** 鼠标悬停或键盘焦点在轮播里时临时暂停 */
+	let holding = $state(false);
+	/** 页面加载完之后才请求后两张图，不和首屏抢带宽 */
+	let ready = $state(false);
+
+	const running = $derived(autoplay && !paused && !holding);
+
+	onMount(() => {
+		autoplay = albums.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (document.readyState === 'complete') ready = true;
+		else addEventListener('load', () => (ready = true), { once: true });
+	});
+
+	function go(i: number) {
+		ready = true;
+		current = (i + albums.length) % albums.length;
+	}
+
+	function onfocusout(e: FocusEvent) {
+		if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node | null)) holding = false;
+	}
 </script>
 
 <svelte:head>
-	<!-- 首屏主图：和 <img> 用同一组 srcset/sizes，浏览器只会下载一份 -->
-	<link
-		rel="preload"
-		as="image"
-		imagesrcset={srcset(prefix, cover.storageKey, cover.width)}
-		imagesizes="100vw"
-		fetchpriority="high"
-	/>
+	<!-- 第一张主图：和 <img> 用同一组 srcset/sizes，浏览器只会下载一份 -->
+	<link rel="preload" as="image" imagesrcset={srcset(prefix, first.storageKey, first.width)} imagesizes="100vw" fetchpriority="high" />
 </svelte:head>
 
-<section class="hero">
-	<Picture image={cover} sizes="100vw" fit="cover" priority class="hero-image" />
-	<div class="scrim" aria-hidden="true"></div>
+<section
+	class="hero"
+	aria-roledescription="carousel"
+	aria-label={t.hero.carousel}
+	onmouseenter={() => (holding = true)}
+	onmouseleave={() => (holding = false)}
+	onfocusin={() => (holding = true)}
+	{onfocusout}
+>
+	{#each albums as album, i (album.slug)}
+		<HeroSlide
+			{album}
+			n={i + 1}
+			total={albums.length}
+			active={i === current}
+			priority={i === 0}
+			loadImage={i === 0 || ready}
+		/>
+	{/each}
 
-	<div class="content">
-		<div class="lead">
-			<p class="label kicker">
-				{album.pinned ? t.hero.pinned : t.hero.latest} — <span class="accent">{fmt(t.photos, { n: album.photoCount })}</span>
-			</p>
-			<h1>{album.title}</h1>
-			{#if album.abstract}
-				<p class="abstract">{album.abstract}</p>
+	{#if albums.length > 1}
+		<div class="controls">
+			{#each albums as album, i (album.slug)}
+				<button
+					class="dot"
+					aria-label={fmt(t.hero.goTo, { n: i + 1 })}
+					aria-current={i === current ? 'true' : undefined}
+					onclick={() => go(i)}
+				>
+					<span class="mono num">{pad(i + 1)}</span>
+					<span class="track">
+						{#if i === current && autoplay}
+							{#key current}
+								<span
+									class="progress"
+									style:animation-play-state={running ? 'running' : 'paused'}
+									onanimationend={() => go(current + 1)}
+								></span>
+							{/key}
+						{/if}
+					</span>
+				</button>
+			{/each}
+			{#if autoplay}
+				<button class="toggle" aria-label={paused ? t.hero.play : t.hero.pause} onclick={() => (paused = !paused)}>
+					{#if paused}
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" /></svg>
+					{:else}
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+					{/if}
+				</button>
 			{/if}
-			<div class="actions">
-				<a class="btn" {href}>{t.hero.enter} <span aria-hidden="true">→</span></a>
-				{#if album.place || album.center}
-					<p class="where mono">
-						{#if album.place}<span>{album.place.name}</span>{/if}
-						{#if album.center}<span class="accent">{f.coord(album.center, 2)}</span>{/if}
-					</p>
-				{/if}
-			</div>
 		</div>
-
-		{#if exifCells.length || cover.exif.camera}
-			<aside class="exif-card" aria-label={t.hero.exif}>
-				{#if cover.exif.camera}<p class="camera">{cover.exif.camera}</p>{/if}
-				{#if cover.exif.lens}<p class="lens mono">{cover.exif.lens}</p>{/if}
-				<dl>
-					{#each exifCells as [term, value] (term)}
-						<div>
-							<dt class="label">{term}</dt>
-							<dd class="mono">{value}</dd>
-						</div>
-					{/each}
-				</dl>
-				{#if cover.takenAt}<p class="taken mono">{f.fullDateTime(cover.takenAt)}</p>{/if}
-			</aside>
-		{/if}
-	</div>
+	{/if}
 </section>
 
 <style>
 	.hero {
 		position: relative;
-		min-height: 820px;
-		display: flex;
-		align-items: flex-end;
-		overflow: hidden;
-		isolation: isolate;
-	}
-
-	.hero :global(.hero-image) {
-		position: absolute;
-		inset: 0;
-		z-index: -2;
-	}
-
-	/* 唯一允许的渐变：保证底部文字可读 */
-	.scrim {
-		position: absolute;
-		inset: 0;
-		z-index: -1;
-		background: linear-gradient(to top, rgb(7 7 7 / 0.92) 0%, rgb(7 7 7 / 0.62) 40%, rgb(7 7 7 / 0.2) 72%, transparent 88%);
-	}
-
-	.content {
-		width: 100%;
-		display: flex;
-		align-items: flex-end;
-		justify-content: space-between;
-		gap: 40px;
-		padding: 0 var(--page-x) 56px;
-	}
-
-	.lead {
-		max-width: 860px;
 		display: grid;
-		gap: 20px;
 	}
 
-	.kicker {
-		color: var(--text-2);
-	}
-
-	h1 {
-		font-size: clamp(64px, 10vw, 148px);
-		font-weight: 700;
-		font-stretch: 112%;
-		line-height: 0.9;
-		letter-spacing: -0.02em;
-		text-wrap: balance;
-	}
-
-	.abstract {
-		max-width: 560px;
-		color: var(--text-2);
-		font-size: 17px;
-	}
-
-	.actions {
+	.controls {
+		position: absolute;
+		left: var(--page-x);
+		bottom: 32px;
+		z-index: 2;
 		display: flex;
-		flex-wrap: wrap;
 		align-items: center;
-		gap: 16px 28px;
-		margin-top: 8px;
+		gap: 4px;
 	}
 
-	.where {
-		display: flex;
-		gap: 16px;
+	.dot {
+		display: grid;
+		gap: 8px;
+		padding: 8px 6px;
+		text-align: left;
+	}
+
+	.num {
 		font-size: 12px;
+		color: var(--muted);
+		transition: color 0.2s var(--ease);
+	}
+
+	.dot:hover .num,
+	.dot[aria-current] .num {
+		color: var(--accent);
+	}
+
+	.track {
+		position: relative;
+		display: block;
+		width: 48px;
+		height: 2px;
+		background: rgb(237 235 230 / 0.25);
+		overflow: hidden;
+	}
+
+	.dot[aria-current] .track {
+		background: rgb(237 235 230 / 0.4);
+	}
+
+	.progress {
+		position: absolute;
+		inset: 0;
+		background: var(--accent);
+		transform-origin: left;
+		animation: progress 7s linear forwards;
+	}
+
+	@keyframes progress {
+		from {
+			transform: scaleX(0);
+		}
+		to {
+			transform: scaleX(1);
+		}
+	}
+
+	.toggle {
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		margin-left: 8px;
 		color: var(--text-2);
 	}
 
-	.exif-card {
-		flex: 0 0 300px;
-		display: grid;
-		gap: 6px;
-		padding: 20px;
-		border: 1px solid rgb(237 235 230 / 0.14);
-		background: rgb(12 12 11 / 0.5);
-		backdrop-filter: blur(18px) saturate(1.2);
-		-webkit-backdrop-filter: blur(18px) saturate(1.2);
+	.toggle:hover {
+		color: var(--text);
 	}
 
-	.camera {
-		font-size: 15px;
-		font-weight: 600;
-	}
-
-	.lens {
-		font-size: 12px;
-		color: var(--muted);
-	}
-
-	dl {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 14px 12px;
-		margin: 12px 0 0;
-		padding-top: 14px;
-		border-top: 1px solid rgb(237 235 230 / 0.14);
-	}
-
-	dd {
-		margin: 2px 0 0;
-		font-size: 18px;
-	}
-
-	.taken {
-		margin-top: 10px;
-		font-size: 12px;
-		color: var(--muted);
+	.toggle svg {
+		width: 18px;
+		height: 18px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.6;
+		stroke-linejoin: round;
+		stroke-linecap: round;
 	}
 
 	@media (max-width: 900px) {
-		.hero {
-			min-height: 100svh;
-		}
-
-		.content {
-			flex-direction: column;
-			align-items: stretch;
-			padding-bottom: 32px;
-		}
-
-		.exif-card {
-			flex-basis: auto;
+		.controls {
+			bottom: 24px;
 		}
 	}
 </style>

@@ -14,7 +14,12 @@ export default {
 		latest: '最新アルバム',
 		pinned: 'ピックアップ',
 		enter: 'アルバムを見る',
-		exif: 'カバー写真のデータ'
+		exif: 'カバー写真のデータ',
+		carousel: 'ピックアップ',
+		slide: '{n} / {total}',
+		goTo: '{n} 番目のピックアップを表示',
+		pause: 'スライドを一時停止',
+		play: 'スライドを再開'
 	},
 	photos: '{n} 枚',
 	albumsHeading: 'アルバム',

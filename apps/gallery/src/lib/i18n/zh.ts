@@ -11,7 +11,12 @@ export default {
 		latest: '最新相册',
 		pinned: '精选相册',
 		enter: '进入相册',
-		exif: '封面参数'
+		exif: '封面参数',
+		carousel: '精选相册',
+		slide: '{n} / {total}',
+		goTo: '查看第 {n} 个精选相册',
+		pause: '暂停轮播',
+		play: '继续轮播'
 	},
 	photos: '{n} 张',
 	albumsHeading: '相册',

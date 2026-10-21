@@ -15,14 +15,15 @@
 <Seo
 	title={`${t.siteName} — ${t.siteTag}`}
 	description={t.siteDescription}
-	image={data.hero ? ogImageUrl(data.imgPrefix, data.hero.cover.storageKey) : undefined}
+	image={data.hero[0] ? ogImageUrl(data.imgPrefix, data.hero[0].cover.storageKey) : undefined}
 />
 
-<Nav overlay={!!data.hero} />
+<Nav overlay={data.hero.length > 0} />
 
 <main>
-	{#if data.hero}
-		<Hero album={data.hero} />
+	<h1 class="sr-only">{t.siteName} — {t.siteTag}</h1>
+	{#if data.hero.length}
+		<Hero albums={data.hero} />
 	{/if}
 
 	<section class="albums" aria-labelledby="albums-heading">

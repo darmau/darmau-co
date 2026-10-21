@@ -14,7 +14,12 @@ export default {
 		latest: 'Latest album',
 		pinned: 'Featured album',
 		enter: 'Enter album',
-		exif: 'Cover EXIF'
+		exif: 'Cover EXIF',
+		carousel: 'Featured albums',
+		slide: '{n} of {total}',
+		goTo: 'Show featured album {n}',
+		pause: 'Pause slideshow',
+		play: 'Resume slideshow'
 	},
 	photos: '{n} photos',
 	albumsHeading: 'Albums',
