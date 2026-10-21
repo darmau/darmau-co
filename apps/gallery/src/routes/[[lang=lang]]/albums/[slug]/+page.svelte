@@ -38,6 +38,8 @@
 		return lo === hi ? `${lo} m` : `${lo} – ${hi} m`;
 	});
 
+	const photoHref = (photo: Photo) => localize(data.lang, `/albums/${album.slug}/${photo.id}`);
+
 	const description = $derived(
 		album.abstract ?? [subtitle, fmt(t.photos, { n: album.photoCount })].filter(Boolean).join(' · ')
 	);
@@ -99,12 +101,17 @@
 		{#each rows as row, r (r)}
 			{#if row.length === 1}
 				<div class="row full">
-					<PhotoFigure photo={row[0]!} sizes="100vw" />
+					<PhotoFigure photo={row[0]!} sizes="100vw" href={photoHref(row[0]!)} label={fmt(t.viewer.photoN, { n: row[0]!.index })} />
 				</div>
 			{:else}
 				<div class="row pair">
 					{#each row as photo (photo.id)}
-						<PhotoFigure {photo} sizes="(max-width: 640px) 100vw, 50vw" />
+						<PhotoFigure
+							{photo}
+							sizes="(max-width: 640px) 100vw, 50vw"
+							href={photoHref(photo)}
+							label={fmt(t.viewer.photoN, { n: photo.index })}
+						/>
 					{/each}
 				</div>
 			{/if}

@@ -7,13 +7,15 @@
 		description: string;
 		image?: string;
 		type?: 'website' | 'article';
+		/** 不带语言前缀的路径；默认取当前 URL。查看器浅路由翻页后 page.url 不会变，需要显式传 */
+		path?: string;
 	}
 
-	let { title, description, image, type = 'website' }: Props = $props();
+	let { title, description, image, type = 'website', path: pathProp }: Props = $props();
 
 	const lang = $derived(page.data.lang as Lang);
 	const base = $derived(page.data.baseUrl as string);
-	const path = $derived(stripLang(page.url.pathname));
+	const path = $derived(pathProp ?? stripLang(page.url.pathname));
 	const canonical = $derived(`${base}${localize(lang, path)}`);
 </script>
 

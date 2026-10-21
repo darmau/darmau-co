@@ -47,6 +47,25 @@ export default {
 		next: '下一个相册',
 		fallback: '这个相册还没有当前语言的版本，以下为中文原文。'
 	},
+	viewer: {
+		back: '返回相册',
+		close: '关闭',
+		info: '照片信息',
+		prev: '上一张',
+		next: '下一张',
+		photoN: '第 {n} 张',
+		filmstrip: '本相册的全部照片',
+		taken: '拍摄时间',
+		params: '拍摄参数',
+		location: '位置',
+		lat: '纬度',
+		lng: '经度',
+		alt: '海拔',
+		ev: '曝光补偿',
+		openMap: '在地图中打开',
+		noExif: '这张照片没有记录拍摄参数',
+		shortcuts: '← → 翻页 · I 信息 · Esc 关闭'
+	},
 	notFound: '找不到这个页面',
 	backHome: '返回首页'
 };

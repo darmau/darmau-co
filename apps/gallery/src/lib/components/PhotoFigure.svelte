@@ -3,14 +3,14 @@
 	import type { Photo } from '$lib/types';
 	import Picture from './Picture.svelte';
 
-	let { photo, sizes }: { photo: Photo; sizes: string } = $props();
+	let { photo, sizes, href, label }: { photo: Photo; sizes: string; href: string; label: string } = $props();
 
 	const exif = $derived(f.exifLine(photo.exif));
 </script>
 
 <!-- 照片没有标题：编号 + 拍摄时间 + 参数 + 位置，有手记时再加一行 -->
 <figure id={`photo-${photo.index}`} style:--ratio={photo.width / photo.height}>
-	<Picture image={photo} {sizes} />
+	<a class="open" {href} aria-label={label}><Picture image={photo} {sizes} /></a>
 	<figcaption>
 		<p class="head mono">
 			<span class="accent">{f.pad(photo.index)}</span>
@@ -35,6 +35,21 @@
 	figure {
 		margin: 0;
 		min-width: 0;
+	}
+
+	.open {
+		display: block;
+		cursor: zoom-in;
+	}
+
+	.open :global(img) {
+		transition:
+			opacity 0.6s var(--ease),
+			filter 0.3s var(--ease);
+	}
+
+	.open:hover :global(img) {
+		filter: brightness(1.08);
 	}
 
 	figcaption {

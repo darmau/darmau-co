@@ -50,6 +50,25 @@ export default {
 		next: 'Next album',
 		fallback: 'This album has not been translated yet. Showing the Chinese original.'
 	},
+	viewer: {
+		back: 'Back to album',
+		close: 'Close',
+		info: 'Photo details',
+		prev: 'Previous photo',
+		next: 'Next photo',
+		photoN: 'Photo {n}',
+		filmstrip: 'All photos in this album',
+		taken: 'Taken',
+		params: 'Exposure',
+		location: 'Location',
+		lat: 'Latitude',
+		lng: 'Longitude',
+		alt: 'Altitude',
+		ev: 'Exposure comp.',
+		openMap: 'Open in map',
+		noExif: 'No EXIF recorded for this photo',
+		shortcuts: '← → browse · I info · Esc close'
+	},
 	notFound: 'Page not found',
 	backHome: 'Back to home'
 } satisfies typeof zh;

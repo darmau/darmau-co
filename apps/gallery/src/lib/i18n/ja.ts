@@ -50,6 +50,25 @@ export default {
 		next: '次のアルバム',
 		fallback: 'このアルバムはまだ日本語に翻訳されていません。中国語の原文を表示しています。'
 	},
+	viewer: {
+		back: 'アルバムに戻る',
+		close: '閉じる',
+		info: '写真の情報',
+		prev: '前の写真',
+		next: '次の写真',
+		photoN: '{n} 枚目',
+		filmstrip: 'このアルバムのすべての写真',
+		taken: '撮影日時',
+		params: '撮影データ',
+		location: '撮影場所',
+		lat: '緯度',
+		lng: '経度',
+		alt: '標高',
+		ev: '露出補正',
+		openMap: '地図で開く',
+		noExif: 'この写真には撮影データがありません',
+		shortcuts: '← → 移動 · I 情報 · Esc 閉じる'
+	},
 	notFound: 'ページが見つかりません',
 	backHome: 'トップへ戻る'
 } satisfies typeof zh;
