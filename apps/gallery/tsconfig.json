@@ -1,0 +1,17 @@
+{
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"moduleResolution": "bundler",
+		// geojson 是 mapbox-gl 类型定义的隐式依赖，见 apps/web/tsconfig.json
+		"types": ["@cloudflare/workers-types", "geojson"]
+	}
+}
