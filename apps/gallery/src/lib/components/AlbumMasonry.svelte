@@ -9,9 +9,11 @@
 		albums: AlbumCard[];
 		/** 传入时最后一格显示「浏览全部相册」入口 */
 		total?: number;
+		/** 卡片标题的层级：首页在 h2 分区下用 h3，/albums 直接在 h1 下用 h2 */
+		headingLevel?: 2 | 3;
 	}
 
-	let { albums, total }: Props = $props();
+	let { albums, total, headingLevel = 3 }: Props = $props();
 
 	const lang = $derived(page.data.lang as Lang);
 	const t = $derived(page.data.t);
@@ -29,7 +31,9 @@
 				/>
 				<div class="info">
 					<p class="meta mono accent">No.{f.pad(album.no, 3)} · {fmt(t.photos, { n: album.photoCount })}</p>
-					<h3 lang={album.fallback ? 'zh' : undefined}>{album.title}</h3>
+					<svelte:element this={`h${headingLevel}`} class="title" lang={album.fallback ? 'zh-CN' : undefined}
+						>{album.title}</svelte:element
+					>
 					{#if album.place}<p class="place">{album.place.name}{album.place.region ? ` · ${album.place.region}` : ''}</p>{/if}
 					<p class="foot mono">
 						<span>{album.center ? f.coord(album.center, 2) : ''}</span>
@@ -114,7 +118,7 @@
 		letter-spacing: 0.08em;
 	}
 
-	h3 {
+	.title {
 		font-size: 24px;
 		font-weight: 650;
 		line-height: 1.15;

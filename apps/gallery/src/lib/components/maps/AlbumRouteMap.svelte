@@ -29,6 +29,21 @@
 		view ? stops.map((p) => ({ photo: p, xy: view.toPixel(p.coord!.lng, p.coord!.lat) })) : []
 	);
 
+	// 同一地点连拍的几张会叠成一团，点击区域互相遮住。离得太近的合并成一个点，
+	// 显示第一张的编号加「+」，链接到第一张。阈值按画布坐标算：手机上地图约 390px 宽，
+	// 40 个单位缩下来约 24px，正好是最小点击尺寸
+	const MERGE = 40;
+	const markers = $derived.by(() => {
+		const out: { xy: [number, number]; photos: Photo[] }[] = [];
+		for (const { photo, xy } of points) {
+			const near = out.find((m) => Math.hypot(m.xy[0] - xy[0], m.xy[1] - xy[1]) < MERGE);
+			if (near) near.photos.push(photo);
+			else out.push({ xy, photos: [photo] });
+		}
+		for (const m of out) m.photos.sort((a, b) => a.index - b.index);
+		return out;
+	});
+
 	const src = $derived(
 		view &&
 			`https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${view.lng.toFixed(6)},${view.lat.toFixed(6)},${view.zoom},0/${W}x${H}@2x` +
@@ -45,14 +60,16 @@
 				<polyline points={points.map(({ xy }) => xy.map((n) => n.toFixed(1)).join(',')).join(' ')} />
 			</svg>
 		{/if}
-		<!-- 同一地点连拍多张时编号会叠在一起，按拍摄顺序后来的盖在上面 -->
-		{#each points as { photo, xy } (photo.id)}
+		{#each markers as { xy, photos: group } (group[0]!.id)}
+			{@const first = group[0]!}
+			{@const text = `${pad(first.index)}${group.length > 1 ? '+' : ''}`}
 			<a
 				class="stop mono"
-				href={`#photo-${photo.index}`}
+				class:group={group.length > 1}
+				href={`#photo-${first.index}`}
 				style:left={`${(xy[0] / W) * 100}%`}
 				style:top={`${(xy[1] / H) * 100}%`}
-				aria-label={`${pad(photo.index)} · ${fmt(t.viewer.photoN, { n: photo.index })}`}>{pad(photo.index)}</a
+				aria-label={`${text} · ${group.map((p) => fmt(t.viewer.photoN, { n: p.index })).join('、')}`}>{text}</a
 			>
 		{/each}
 		<!-- 静态图关掉了内置署名，按 Mapbox 条款自己补上 -->
@@ -92,9 +109,10 @@
 		position: absolute;
 		display: grid;
 		place-items: center;
-		width: 24px;
+		min-width: 24px;
 		height: 24px;
-		margin: -12px 0 0 -12px;
+		/* 用 transform 居中：合并点宽度不固定 */
+		transform: translate(-50%, -50%);
 		border-radius: 50%;
 		background: var(--accent);
 		border: 1.5px solid var(--bg);
@@ -105,10 +123,16 @@
 		transition: transform 0.2s var(--ease);
 	}
 
+	/* 合并点：横向撑开放下「05+」 */
+	.stop.group {
+		padding: 0 5px;
+		border-radius: 12px;
+	}
+
 	.stop:hover,
 	.stop:focus-visible {
 		z-index: 1;
-		transform: scale(1.2);
+		transform: translate(-50%, -50%) scale(1.2);
 	}
 
 	figcaption {

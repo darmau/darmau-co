@@ -18,7 +18,7 @@
 		<h1>{t.albumsAll}</h1>
 		<p class="label"><span class="accent">{data.albums.length}</span> · {fmt(t.photos, { n: data.albums.reduce((n, a) => n + a.photoCount, 0) })}</p>
 	</header>
-	<AlbumMasonry albums={data.albums} />
+	<AlbumMasonry albums={data.albums} headingLevel={2} />
 </main>
 
 <Footer />
