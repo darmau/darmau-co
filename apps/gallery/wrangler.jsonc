@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "firewood-gallery",
+  // SvelteKit 的 adapter-cloudflare 把 Worker 和静态资源一起产出到 .svelte-kit/cloudflare
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "compatibility_date": "2025-11-07",
+  // SvelteKit 运行时要 node:async_hooks
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".svelte-kit/cloudflare",
+    "binding": "ASSETS"
+  },
+  "routes": [{ "pattern": "gallery.darmau.co", "custom_domain": true }],
+  "observability": {
+    "enabled": true
+  }
+  // 运行时变量（SUPABASE_URL / SUPABASE_ANON_KEY / IMG_PREFIX / MAPBOX_TOKEN / BASE_URL）
+  // 线上走 `wrangler secret put`，本地写 .dev.vars。仓库是公开的，所以不放 vars 里。
+}
