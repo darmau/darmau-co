@@ -30,9 +30,9 @@
 	);
 
 	// 同一地点连拍的几张会叠成一团，点击区域互相遮住。离得太近的合并成一个点，
-	// 显示第一张的编号加「+」，链接到第一张。阈值按画布坐标算：手机上地图约 390px 宽，
-	// 40 个单位缩下来约 24px，正好是最小点击尺寸
-	const MERGE = 40;
+	// 显示第一张的编号加「+」，链接到第一张。阈值按画布坐标算：手机上地图约 380px 宽，
+	// 56 个单位缩下来约 33px，够放下最宽的「09+」合并点（约 30px）
+	const MERGE = 56;
 	const markers = $derived.by(() => {
 		const out: { xy: [number, number]; photos: Photo[] }[] = [];
 		for (const { photo, xy } of points) {
