@@ -9,6 +9,17 @@
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<!-- 图片淡入依赖 JS；没有 JS 时 Picture 直接显示图片，见 Picture.svelte -->
 		<script>document.documentElement.classList.add('js');</script>
+		<!-- 带 data-async-css 的样式表先以 media=print 下载（不阻塞渲染），加载完切成 all -->
+		<script>
+			document.addEventListener(
+				'load',
+				function (e) {
+					var el = e.target;
+					if (el.tagName === 'LINK' && el.hasAttribute('data-async-css')) el.media = 'all';
+				},
+				true
+			);
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

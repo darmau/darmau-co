@@ -8,9 +8,12 @@ export function imageUrl(prefix: string, key: string, width: number, quality = 8
 	return `${prefix}/cdn-cgi/image/format=auto,quality=${quality},width=${width}/${key}`;
 }
 
-/** 不超过原图宽度的档位；原图比最小档还窄时只给原图宽度 */
-export function srcset(prefix: string, key: string, originalWidth: number): string {
-	const widths = WIDTHS.filter((w) => w <= originalWidth);
+/**
+ * 不超过原图宽度（以及 maxWidth）的档位；原图比最小档还窄时只给原图宽度。
+ * 小尺寸展示位（卡片、缩略图）传 maxWidth，省掉永远用不上的大档，列表页 HTML 能小一截。
+ */
+export function srcset(prefix: string, key: string, originalWidth: number, maxWidth = Infinity): string {
+	const widths = WIDTHS.filter((w) => w <= originalWidth && w <= maxWidth);
 	if (!widths.length) widths.push(originalWidth as (typeof WIDTHS)[number]);
 	return widths.map((w) => `${imageUrl(prefix, key, w)} ${w}w`).join(', ');
 }

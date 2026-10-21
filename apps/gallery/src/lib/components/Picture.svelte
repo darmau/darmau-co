@@ -9,10 +9,12 @@
 		priority?: boolean;
 		/** cover 用于主图这类铺满容器的场景；默认按原比例完整显示 */
 		fit?: 'natural' | 'cover' | 'contain';
+		/** srcset 的最大档位，见 lib/image.ts srcset() */
+		maxWidth?: number;
 		class?: string;
 	}
 
-	let { image, sizes, priority = false, fit = 'natural', class: className = '' }: Props = $props();
+	let { image, sizes, priority = false, fit = 'natural', maxWidth, class: className = '' }: Props = $props();
 
 	const prefix = getImgPrefix();
 	let loaded = $state(false);
@@ -31,8 +33,8 @@
 >
 	<img
 		{@attach checkComplete}
-		src={imageUrl(prefix, image.storageKey, 1600)}
-		srcset={srcset(prefix, image.storageKey, image.width)}
+		src={imageUrl(prefix, image.storageKey, Math.min(1600, maxWidth ?? 1600))}
+		srcset={srcset(prefix, image.storageKey, image.width, maxWidth)}
 		{sizes}
 		width={image.width}
 		height={image.height}

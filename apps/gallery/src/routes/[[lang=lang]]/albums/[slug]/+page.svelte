@@ -127,7 +127,7 @@
 					<span class="next-title">{data.next.title}</span>
 					<span class="mono next-count">{fmt(t.photos, { n: data.next.photoCount })}</span>
 				</span>
-				<span class="thumb"><Picture image={data.next.cover} sizes="240px" fit="cover" /></span>
+				<span class="thumb"><Picture image={data.next.cover} sizes="240px" fit="cover" maxWidth={480} /></span>
 			</a>
 		{/if}
 	</nav>

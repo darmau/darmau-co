@@ -2,11 +2,11 @@
 	import { page } from '$app/state';
 	import * as f from '$lib/format';
 	import { fmt, localize, type Lang } from '$lib/i18n';
-	import type { AlbumSummary } from '$lib/types';
+	import type { AlbumCard } from '$lib/types';
 	import Picture from './Picture.svelte';
 
 	interface Props {
-		albums: AlbumSummary[];
+		albums: AlbumCard[];
 		/** 传入时最后一格显示「浏览全部相册」入口 */
 		total?: number;
 	}
@@ -24,6 +24,7 @@
 				<Picture
 					image={album.cover}
 					sizes="(max-width: 800px) 100vw, (max-width: 1200px) 50vw, 33vw"
+					maxWidth={1600}
 					class="card-image"
 				/>
 				<div class="info">

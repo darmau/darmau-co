@@ -1,4 +1,4 @@
-import { getSupabase, listAlbums } from '$lib/server/albums';
+import { getSupabase, listAlbums, toCard } from '$lib/server/albums';
 import { PAGE_CACHE } from '$lib/server/cache';
 import type { PageServerLoad } from './$types';
 
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals, platform, setHeaders }) => 
 
 	return {
 		hero,
-		albums: albums.slice(0, HOME_LIMIT),
+		albums: albums.slice(0, HOME_LIMIT).map(toCard),
 		total: albums.length,
 		points: albums
 			.filter((a) => a.center)

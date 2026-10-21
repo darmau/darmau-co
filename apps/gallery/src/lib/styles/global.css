@@ -1,8 +1,8 @@
 /* Archivo 用带 wdth 轴的版本，Logo 要 font-stretch: 125% */
 @import '@fontsource-variable/archivo/wdth.css';
 @import '@fontsource-variable/jetbrains-mono/index.css';
-/* 按 unicode-range 分片，只下载页面上出现的字 */
-@import '@fontsource-variable/noto-sans-sc/index.css';
+/* Noto Sans SC 的 @font-face 有一百多段（按 unicode-range 分片），放在这里会让首屏样式表
+   多出 40KB+ 并阻塞渲染，改由 +layout.svelte 异步加载 */
 
 :root {
 	--bg: #0c0c0b;

@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@darmau/database';
 import { DB_LANG, type Lang } from '$lib/i18n';
-import type { Album, AlbumSummary, Coord, Photo, Place } from '$lib/types';
+import type { Album, AlbumCard, AlbumSummary, Coord, Photo, Place } from '$lib/types';
 import { EXIF_KEYS, altitude, normalizeExif, takenAt, type RawExif } from './exif';
 import { cleanAddress, parsePlace } from './place';
 
@@ -199,24 +199,35 @@ function toSummary(album: Album): AlbumSummary {
 	return summary;
 }
 
+export function toCard(album: AlbumSummary): AlbumCard {
+	const { no, slug, title, photoCount, place, center, dateRange, fallback, cover } = album;
+	const { storageKey, width, height, alt } = cover;
+	return { no, slug, title, photoCount, place, center, dateRange, fallback, cover: { storageKey, width, height, alt } };
+}
+
 // ---- 对外接口 --------------------------------------------------------------
 
 // 同一个 isolate 里短时间内的重复请求（首页、相册页的「下一个相册」）共用一次查询。
 // 跨 isolate 的缓存靠页面响应的 Cache-Control + adapter-cloudflare 的边缘缓存。
 const LIST_TTL = 60_000;
-const listCache = new Map<Lang, { at: number; value: Promise<AlbumSummary[]> }>();
+const listCache = new Map<Lang, { at: number; value: Promise<Album[]> }>();
 
-export function listAlbums(supabase: Client, lang: Lang): Promise<AlbumSummary[]> {
+/** 全部相册（含照片，不含正文），已补好编号。sitemap 用；页面请用 listAlbums */
+export function listAlbumsWithPhotos(supabase: Client, lang: Lang): Promise<Album[]> {
 	const hit = listCache.get(lang);
 	if (hit && Date.now() - hit.at < LIST_TTL) return hit.value;
 
 	const value = fetchAlbumRows(supabase, lang).then((rows) => {
 		const albums = rows.map(({ row, fallback }) => toAlbum(row, fallback)).filter((a): a is Album => !!a);
-		return albums.map((album, i) => ({ ...toSummary(album), no: albums.length - i }));
+		return albums.map((album, i) => ({ ...album, no: albums.length - i }));
 	});
 	listCache.set(lang, { at: Date.now(), value });
 	value.catch(() => listCache.delete(lang));
 	return value;
+}
+
+export async function listAlbums(supabase: Client, lang: Lang): Promise<AlbumSummary[]> {
+	return (await listAlbumsWithPhotos(supabase, lang)).map(toSummary);
 }
 
 export async function getAlbum(supabase: Client, lang: Lang, slug: string): Promise<Album | null> {

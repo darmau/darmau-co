@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { getAlbum, getSupabase, listAlbums } from '$lib/server/albums';
+import { getAlbum, getSupabase, listAlbums, toCard } from '$lib/server/albums';
 import { PAGE_CACHE } from '$lib/server/cache';
 import type { PageServerLoad } from './$types';
 
@@ -19,6 +19,6 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 
 	return {
 		album: { ...album, no: all[at]?.no ?? 0 },
-		next: next && { slug: next.slug, title: next.title, photoCount: next.photoCount, cover: next.cover, fallback: next.fallback }
+		next: next && toCard(next)
 	};
 };

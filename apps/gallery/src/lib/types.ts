@@ -79,6 +79,15 @@ export interface AlbumSummary {
 	fallback: boolean;
 }
 
+/** 卡片只需要封面的这几项；列表页有上百个相册，整份 Photo 会让 HTML 膨胀好几倍 */
+export type CardImage = Pick<Photo, 'storageKey' | 'width' | 'height' | 'alt'>;
+
+/** 瀑布流卡片、「下一个相册」用的最小数据 */
+export type AlbumCard = Pick<
+	AlbumSummary,
+	'no' | 'slug' | 'title' | 'photoCount' | 'place' | 'center' | 'dateRange' | 'fallback'
+> & { cover: CardImage };
+
 export interface Album extends AlbumSummary {
 	/** CMS 写的 HTML 正文 */
 	descriptionHtml: string | null;
