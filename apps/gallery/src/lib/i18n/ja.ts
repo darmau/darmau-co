@@ -38,5 +38,18 @@ export default {
 		iso: 'ISO',
 		size: 'サイズ'
 	},
-	notFound: 'ページが見つかりません'
+	album: {
+		place: '場所',
+		dates: '日付',
+		count: '枚数',
+		altitude: '標高',
+		gear: '機材',
+		info: 'アルバム情報',
+		route: '撮影ルート',
+		backAll: 'すべてのアルバム',
+		next: '次のアルバム',
+		fallback: 'このアルバムはまだ日本語に翻訳されていません。中国語の原文を表示しています。'
+	},
+	notFound: 'ページが見つかりません',
+	backHome: 'トップへ戻る'
 } satisfies typeof zh;

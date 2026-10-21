@@ -35,5 +35,18 @@ export default {
 		iso: 'ISO',
 		size: '尺寸'
 	},
-	notFound: '找不到这个页面'
+	album: {
+		place: '地点',
+		dates: '日期',
+		count: '张数',
+		altitude: '海拔',
+		gear: '器材',
+		info: '相册信息',
+		route: '拍摄路线',
+		backAll: '全部相册',
+		next: '下一个相册',
+		fallback: '这个相册还没有当前语言的版本，以下为中文原文。'
+	},
+	notFound: '找不到这个页面',
+	backHome: '返回首页'
 };

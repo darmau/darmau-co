@@ -38,5 +38,18 @@ export default {
 		iso: 'ISO',
 		size: 'Size'
 	},
-	notFound: 'Page not found'
+	album: {
+		place: 'Location',
+		dates: 'Dates',
+		count: 'Photos',
+		altitude: 'Altitude',
+		gear: 'Gear',
+		info: 'Album details',
+		route: 'Route',
+		backAll: 'All albums',
+		next: 'Next album',
+		fallback: 'This album has not been translated yet. Showing the Chinese original.'
+	},
+	notFound: 'Page not found',
+	backHome: 'Back to home'
 } satisfies typeof zh;
